@@ -1,0 +1,26 @@
+html {
+  font-family: 'Courier New', Courier, monospace;
+  box-sizing: border-box;
+
+}
+body, ul {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+ul {
+  list-style: none;
+}
+
+.question {
+  background: #00d7825c;
+  box-shadow: -1px -1px 3px 0px #1a1a1a4f;
+  cursor: pointer;
+}
+.answer {
+  padding: 1rem;
+}
+
+.margin-bottom {
+  margin-bottom: 20px;
+}
