@@ -13,7 +13,8 @@ import './index.css';
 const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=01123&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
 
 //URL for food search:
-const searchURL = 'https://api.nal.usda.gov/ndb/search/?format=json&q=egg&ds=Standard%20Reference&sort=r&max=10&offset=0&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
+//const searchURL = 'https://api.nal.usda.gov/ndb/search/?format=json&q=egg&ds=Standard%20Reference&sort=r&max=10&offset=0&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
+
 
 
 const nutrientIDs = [
@@ -34,6 +35,7 @@ const nutrientIDs = [
     id: 205
   }
 ]
+
 
 const carbIDs = [
   {
@@ -65,6 +67,7 @@ const fatIDs = [
   }
 ]
 
+
 /*
 fetch(itemURL)
   .then(result => result.json())
@@ -74,8 +77,9 @@ fetch(itemURL)
   .catch(err => {
     console.log('error: ', err)
   });
+  */
 
-*/
+
 
 let foodLog = (foodResult) => {
   let food = foodResult.foods[0].food;
@@ -133,17 +137,7 @@ class Accordian extends React.Component {
   }
   componentDidMount() {
     this.setState({isLoading: true})
-    fetch(itemURL)
-      .then(result => result.json())
-      .then(result => {
-        console.log(result);
-        this.setState({
-          foodData: result.foods[0].food
-        })
-      })
-      .catch(err => {
-        console.log('error: ', err)
-      });
+
     fetch(url)
       .then(response => {
         if (response.ok) {
@@ -153,22 +147,44 @@ class Accordian extends React.Component {
         }
       })
       .then(response => {
+        //console.log('response', response)
         this.setState({
           data: response,
           isLoading: false
         })
       })
       .catch(error => {
-        console.log(error);
+        console.log('error: ', error);
         this.setState({error})
       })
+
+      fetch(itemURL)
+      .then(result => {
+        if (result.ok) {
+          return result.json();
+        } else {
+          return;
+        }
+      })
+      .then(result => {
+        console.log('result', [result.foods[0].food]);
+        this.setState({
+          foodData: [result.foods[0].food]
+        })
+      })
+      .catch(error => {
+        console.log('error: ', error);
+        this.setState({error})
+      });
   }
   render() {
     const {data, foodData, currentIndex, isLoading, error} = this.state;
-    console.log(foodData);
-    //console.log(data);
-    console.log(foodData.nutrients);
+    console.log('data', data);
+    console.log('foodData', foodData);
+    //console.log('foodData[0]', foodData[0]);
+
     const repoRenders = data.map((repo, i) => {
+      //console.log('repo', repo)
       return (
         <Repo
           key={repo.id}
@@ -179,12 +195,30 @@ class Accordian extends React.Component {
           handleClick={this.handleClick}/>
       )
     })
+
+    const foodRenders = foodData.map((food, i) => {
+      console.log('food', food);
+
+      const nutrientData = food.nutrients.filter(nutrient => nutrientIDs.some(n => n.id === nutrient.nutrient_id))
+      console.log('nutrientData', nutrientData);
+
+      return (
+        <Food
+          key={i}
+          index={i}
+          desc={food.desc.name}
+          nutrients={nutrientData}
+          currentIndex={currentIndex}
+          handleClick={this.handleClick}/>
+      )
+    })
     
     return (
       error ? <span>Something went wrong...{error.message}</span> :
       isLoading ? <span>Loading...</span> :
       <div>
         {isLoading ? <li style={{backgroundColor: 'red'}}>Loading...</li> : repoRenders}
+        {foodRenders}
       </div>
     )
   }
@@ -202,6 +236,30 @@ class Repo extends React.Component {
       <ul className='holder'>
         <li className='question'onClick={this.handleClick}>{name}</li>
         {current && <li className={current ? 'answer open' : 'answer'}>{desc}</li>}
+      </ul>
+    )
+  }
+}
+
+class Food extends React.Component {
+  handleClick = () => {
+    const {index, handleClick} = this.props;
+    handleClick(index);
+  }
+  render() {
+    const {index, desc, nutrients, currentIndex} = this.props;
+    let current = currentIndex === index;
+
+    const nutrientRenders = nutrients.map((nutrient, i) => {
+      return (
+        <li key={i}>{nutrient.name}</li>
+      )
+    })
+
+    return (
+      <ul className='holder'>
+        <li className='question'onClick={this.handleClick}>{desc}</li>
+        {current && <li className={current ? 'answer open' : 'answer'}><ul>{nutrientRenders}</ul></li>}
       </ul>
     )
   }
