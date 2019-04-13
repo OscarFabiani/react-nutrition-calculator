@@ -9,7 +9,7 @@ body, ul {
   border: none;
 }
 ul {
-  list-style: none;
+  list-style: disc;
 }
 
 .question {

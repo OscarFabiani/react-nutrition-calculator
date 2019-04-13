@@ -115,12 +115,6 @@ const logMeasures = (nutrient) => {
 
 
 
-
-
-//URL to JSON data for my github repos
-const url = 'https://api.github.com/users/oscarfabiani/repos';
-
-
 //A component that displays JSON data as an accordian.
 class Accordian extends React.Component {
   state = {
@@ -138,7 +132,107 @@ class Accordian extends React.Component {
   componentDidMount() {
     this.setState({isLoading: true})
 
-    fetch(url)
+    fetch(itemURL)
+    .then(result => {
+      if (result.ok) {
+        return result.json();
+      } else {
+        return;
+      }
+    })
+    .then(result => {
+      //console.log('result', [result.foods[0].food]);
+      this.setState({
+        foodData: [result.foods[0].food],
+        isLoading: false
+      })
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      this.setState({error})
+    });
+  }
+  render() {
+    const {data, foodData, currentIndex, isLoading, error} = this.state;
+    //console.log('data', data);
+    //console.log('foodData', foodData);
+
+    const foodRenders = foodData.map((food, i) => {
+      //console.log('food', food);
+
+      const nutrientData = food.nutrients.filter(nutrient => nutrientIDs.some(n => n.id === nutrient.nutrient_id))
+      //console.log('nutrientData', nutrientData);
+
+      return (
+        <Food
+          key={i}
+          index={i}
+          desc={food.desc}
+          nutrients={nutrientData}
+          currentIndex={currentIndex}
+          handleClick={this.handleClick}/>
+      )
+    })
+    
+    return (
+      error ? <span>Something went wrong...{error.message}</span> :
+      isLoading ? <span>Loading...</span> :
+      <div>
+        {foodRenders}
+      </div>
+    )
+  }
+}
+
+class Food extends React.Component {
+  handleClick = () => {
+    const {index, handleClick} = this.props;
+    handleClick(index);
+  }
+  render() {
+    const {index, desc, nutrients, currentIndex} = this.props;
+    let current = currentIndex === index;
+
+    const nutrientRenders = nutrients.map((nutrient, i) => {
+      const name = nutrientIDs.find(nid => nid.id === nutrient.nutrient_id).name;
+      return (
+        <ul key={i}>
+          <li className='question' onClick={this.handleClick}>{name}</li>
+          {current && <li className={current ? 'answer open' : 'answer'}><ul>{`${nutrient.value}${nutrient.unit}'s`}</ul></li>}
+        </ul>
+      )
+    })
+
+    return (
+      <div>
+        <h1>{desc.name}</h1>
+        <span>(per 100 grams)</span>
+        {nutrientRenders}
+      </div>
+    )
+  }
+}
+
+
+
+
+ReactDOM.render(
+  <Accordian />,
+  document.getElementById('root')
+);
+
+
+//CONTINUE INTEGRATING API INTO ACCORDIAN
+
+
+
+
+//URL to JSON data for my github repos
+//const url = 'https://api.github.com/users/oscarfabiani/repos';
+
+//Formerly in componentDidUpdate of Accordian
+/*
+fetch(url)
       .then(response => {
         if (response.ok) {
           return response.json();
@@ -158,72 +252,25 @@ class Accordian extends React.Component {
         this.setState({error})
       })
 
-      fetch(itemURL)
-      .then(result => {
-        if (result.ok) {
-          return result.json();
-        } else {
-          return;
-        }
-      })
-      .then(result => {
-        console.log('result', [result.foods[0].food]);
-        this.setState({
-          foodData: [result.foods[0].food]
-        })
-      })
-      .catch(error => {
-        console.log('error: ', error);
-        this.setState({error})
-      });
-  }
-  render() {
-    const {data, foodData, currentIndex, isLoading, error} = this.state;
-    console.log('data', data);
-    console.log('foodData', foodData);
-    //console.log('foodData[0]', foodData[0]);
+*/
 
-    const repoRenders = data.map((repo, i) => {
-      //console.log('repo', repo)
-      return (
-        <Repo
-          key={repo.id}
-          index={i}
-          name={repo.name}
-          desc={repo.description}
-          currentIndex={currentIndex}
-          handleClick={this.handleClick}/>
-      )
-    })
+//Formerly in the render of Accordian
+/*
+const repoRenders = data.map((repo, i) => {
+  //console.log('repo', repo)
+  return (
+    <Repo
+      key={repo.id}
+      index={i}
+      name={repo.name}
+      desc={repo.description}
+      currentIndex={currentIndex}
+      handleClick={this.handleClick}/>
+  )
+})
+*/
 
-    const foodRenders = foodData.map((food, i) => {
-      console.log('food', food);
-
-      const nutrientData = food.nutrients.filter(nutrient => nutrientIDs.some(n => n.id === nutrient.nutrient_id))
-      console.log('nutrientData', nutrientData);
-
-      return (
-        <Food
-          key={i}
-          index={i}
-          desc={food.desc.name}
-          nutrients={nutrientData}
-          currentIndex={currentIndex}
-          handleClick={this.handleClick}/>
-      )
-    })
-    
-    return (
-      error ? <span>Something went wrong...{error.message}</span> :
-      isLoading ? <span>Loading...</span> :
-      <div>
-        {isLoading ? <li style={{backgroundColor: 'red'}}>Loading...</li> : repoRenders}
-        {foodRenders}
-      </div>
-    )
-  }
-}
-
+/*
 class Repo extends React.Component {
   handleClick = () => {
     const {index, handleClick} = this.props;
@@ -240,36 +287,4 @@ class Repo extends React.Component {
     )
   }
 }
-
-class Food extends React.Component {
-  handleClick = () => {
-    const {index, handleClick} = this.props;
-    handleClick(index);
-  }
-  render() {
-    const {index, desc, nutrients, currentIndex} = this.props;
-    let current = currentIndex === index;
-
-    const nutrientRenders = nutrients.map((nutrient, i) => {
-      return (
-        <li key={i}>{nutrient.name}</li>
-      )
-    })
-
-    return (
-      <ul className='holder'>
-        <li className='question'onClick={this.handleClick}>{desc}</li>
-        {current && <li className={current ? 'answer open' : 'answer'}><ul>{nutrientRenders}</ul></li>}
-      </ul>
-    )
-  }
-}
-
-
-ReactDOM.render(
-  <Accordian />,
-  document.getElementById('root')
-);
-
-
-//CONTINUE INTEGRATING API INTO ACCORDIAN
+*/
