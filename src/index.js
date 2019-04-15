@@ -11,7 +11,7 @@ import './index.css';
 //01123
 
 //URL for USDA food item:
-const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=01123&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
+const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=01123&ndbno=16058&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
 
 //URL for food search:
 //const searchURL = 'https://api.nal.usda.gov/ndb/search/?format=json&q=egg&ds=Standard%20Reference&sort=r&max=10&offset=0&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
@@ -81,12 +81,16 @@ const setNutrientValue = (nutrients, id) => {
   return nutrient? nutrient.value : null;
 }
 
+const createSimpleFoodObjects = (reports) => {
+  //console.log('reports', reports);
+  return reports.map(food => createSimpleFoodObject(food.food));
+}
 
 const createSimpleFoodObject = (report) => {
   //console.log('report: ', report);
   return {
     id: report.desc.ndbno,
-    name: 'Egg',
+    name: report.desc.name,
     nutrients: [
       {
         id: 208,
@@ -223,11 +227,14 @@ const createComplexFoodObject = (report) => {
 
 
 
+
+
 //A component that displays JSON data as an accordian.
 class Accordian extends React.Component {
   state = {
     foodData: [],
     customFoodData: [],
+    customFoodData2: [],
     grams: 200,
     currentIndex: -1,
     isLoading: false,
@@ -259,6 +266,7 @@ class Accordian extends React.Component {
       this.setState({
         foodData: [result.foods[0].food],
         customFoodData: [createSimpleFoodObject(result.foods[0].food)],
+        customFoodData2: createSimpleFoodObjects(result.foods),
         isLoading: false
       })
     })
@@ -268,32 +276,15 @@ class Accordian extends React.Component {
     });
   }
   render() {
-    const {foodData, customFoodData, grams, currentIndex, isLoading, error} = this.state;
+    const {foodData, customFoodData, customFoodData2, grams, currentIndex, isLoading, error} = this.state;
     //console.log('data', data);
-    console.log('foodData', foodData);
+    //console.log('foodData', foodData);
     console.log('customFoodData', customFoodData);
-    console.log(this.updateGrams)
+    console.log('customFoodData2', customFoodData2);
 
-    const foodRenders = foodData.map((food, i) => {
-      //console.log('food', food);
-
-      const nutrientData = food.nutrients.filter(nutrient => nutrientIDs.some(n => n.id === nutrient.nutrient_id))
-      //console.log('nutrientData', nutrientData);
-
+    const foodRenders3 = customFoodData2.map((food, i) => {
       return (
-        <Food
-          key={i}
-          index={i}
-          desc={food.desc}
-          nutrients={nutrientData}
-          currentIndex={currentIndex}
-          handleClick={this.handleClick}/>
-      )
-    })
-
-    const foodRenders2 = customFoodData.map((food, i) => {
-      return (
-        <Food2
+        <Food3
           key={i}
           index={i}
           name={food.name}
@@ -309,8 +300,7 @@ class Accordian extends React.Component {
       error ? <span>Something went wrong...{error.message}</span> :
       isLoading ? <span>Loading...</span> :
       <div>
-        {foodRenders2}
-        {foodRenders}
+        {foodRenders3}
       </div>
     )
   }
@@ -323,7 +313,7 @@ const roundToTwo = (num) => {
 }
 //NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
 
-class Food2 extends React.Component {
+class Food3 extends React.Component {
   handleClick = () => {
     const {index, handleClick} = this.props;
     handleClick(index);
@@ -357,6 +347,52 @@ class Food2 extends React.Component {
   }
 }
 
+
+
+
+ReactDOM.render(
+  <Accordian />,
+  document.getElementById('root')
+);
+
+
+//FIGURE WHERE THE STATE FOR EACH FOODS' GRAMS SHOULD LIVE AND THE SUPPORTING LOGIC
+//DELETE/ARCHIVE OLD LOGIC
+
+//As of 4/15/19 I have created 2 methods to render data from an API food report. The first is to pull data from
+//the report considering the format of the food report object and necessarily filtering the nested nutrient
+//object using a local object of nutrient ID's and preferred names. The second is to create a custom food
+//object from the API report when Fetching then writing the data display logic considering the custom object's
+//format with no need for filtering through nutrients or addeding logic for displaying preffered names of
+//nutrients (though it looks I'll still need either a local object or added logic to the custom object to
+//display prefferred food names).
+
+//As of now I'm not sure which of these methods will be best going forward. It looks like the second methods
+//results in more lines of code but makes the components more concise and understandable. One method may prove
+//preferrable over the other as I add secondary nutrients and increase functionality.
+
+
+
+//This logic is for displaying data from the API food report without creating a local custom object.
+/*
+//This was originally in the render method of Accordian
+const foodRenders = foodData.map((food, i) => {
+  //console.log('food', food);
+
+  const nutrientData = food.nutrients.filter(nutrient => nutrientIDs.some(n => n.id === nutrient.nutrient_id))
+  //console.log('nutrientData', nutrientData);
+
+  return (
+    <Food
+      key={i}
+      index={i}
+      desc={food.desc}
+      nutrients={nutrientData}
+      currentIndex={currentIndex}
+      handleClick={this.handleClick}/>
+  )
+})
+
 class Food extends React.Component {
   handleClick = () => {
     const {index, handleClick} = this.props;
@@ -385,30 +421,7 @@ class Food extends React.Component {
     )
   }
 }
-
-
-
-
-ReactDOM.render(
-  <Accordian />,
-  document.getElementById('root')
-);
-
-
-//CONTINUE INTEGRATING API INTO ACCORDIAN
-
-//As of 4/15/19 I have created 2 methods to render data from an API food report. The first is to pull data from
-//the report considering the format of the food report object and necessarily filtering the nested nutrient
-//object using a local object of nutrient ID's and preferred names. The second is to create a custom food
-//object from the API report when Fetching then writing the data display logic considering the custom object's
-//format with no need for filtering through nutrients or addeding logic for displaying preffered names of
-//nutrients (though it looks I'll still need either a local object or added logic to the custom object to
-//display prefferred food names).
-
-//As of now I'm not sure which of these methods will be best going forward. It looks like the second methods
-//results in more lines of code but makes the components more concise and understandable. One method may prove
-//preferrable over the other as I add secondary nutrients and increase functionality.
-
+*/
 
 
 
