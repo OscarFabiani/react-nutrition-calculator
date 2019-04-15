@@ -11,7 +11,7 @@ import './index.css';
 //01123
 
 //URL for USDA food item:
-const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=16058&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
+const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=01123&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
 
 //URL for food search:
 //const searchURL = 'https://api.nal.usda.gov/ndb/search/?format=json&q=egg&ds=Standard%20Reference&sort=r&max=10&offset=0&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
@@ -69,47 +69,6 @@ const fatIDs = [
 ]
 
 
-/*
-fetch(itemURL)
-  .then(result => result.json())
-  .then(result => {
-    foodLog(result);
-  })
-  .catch(err => {
-    console.log('error: ', err)
-  });
-  */
-
-
-
-let foodLog = (foodResult) => {
-  let food = foodResult.foods[0].food;
-  let nutrients = food.nutrients.filter(nutrient => nutrientIDs.some(n => n.id === nutrient.nutrient_id))
-  console.log(nutrients);
-
-  logDesc(food);
-  nutrients.forEach(nutrient => {
-    logMeasures(nutrient);
-  })
-};
-
-
-const logDesc = (food) => {
-  console.log('Description:')
-  console.log('foodGroup: ' + food.desc.fg);
-  console.log('id: ' + food.desc.ndbno);
-  console.log('name: ' + food.desc.name);
-}
-
-const logMeasures = (nutrient) => {
-  console.log(`${nutrient.name}:`)
-  console.log(`${nutrient.unit}'s per 100g ${nutrient.value}`);
-  nutrient.measures.forEach(measure => {
-    measure != null &&
-      console.log(`${nutrient.unit}'s per ${measure.label}(${measure.eqv}${measure.eunit}): ${measure.value}`);
-  })
-}
-
 //This function checks if a nutrient exists in a food report. This is meant to be used when creating custom
 //food objects from API food reports since some foods seem to ommitt certain key nutrients.
 //NOTE: Another approach would be to vet each food making sure each had all of the key nutrients present (or
@@ -123,8 +82,48 @@ const setNutrientValue = (nutrients, id) => {
 }
 
 
-const createFoodObject = (report) => {
-  console.log('report: ', report);
+const createSimpleFoodObject = (report) => {
+  //console.log('report: ', report);
+  return {
+    id: report.desc.ndbno,
+    name: 'Egg',
+    nutrients: [
+      {
+        id: 208,
+        name: 'Calories',
+        unit: 'kcals',
+        value: setNutrientValue(report.nutrients, 208),
+        measurements: {},
+      },
+      {
+        id: 203,
+        name: 'Protein',
+        unit: 'grams',
+        value: setNutrientValue(report.nutrients, 203),
+        measurements: {},
+      },
+      {
+        id: 204,
+        name: 'Total Fat',
+        unit: 'grams',
+        value: setNutrientValue(report.nutrients, 204),
+        measurements: {},
+      },
+      {
+        id: 205,
+        name: 'Total Carbs',
+        unit: 'grams',
+        value: setNutrientValue(report.nutrients, 205),
+        measurements: {},
+      },
+    ]
+  }
+}
+
+//THIS FUNCTION LIKELY NEEDS TO BE REFACTORED TO INCLUDE NESTED ARRAYS OF OBJECTS FOR MAPPING (SIMILAR TO
+//createSimpleObject()).
+const createComplexFoodObject = (report) => {
+  //console.log('report: ', report);
   return {
     id: report.desc.ndbno,
     name: report.desc.name,
@@ -227,9 +226,9 @@ const createFoodObject = (report) => {
 //A component that displays JSON data as an accordian.
 class Accordian extends React.Component {
   state = {
-    data: [],
     foodData: [],
     customFoodData: [],
+    grams: 200,
     currentIndex: -1,
     isLoading: false,
     error: null
@@ -237,6 +236,11 @@ class Accordian extends React.Component {
   handleClick = (i) => {
     this.setState (prevState => {
       return {currentIndex: prevState.currentIndex === i ? -1 : i}
+    })
+  }
+  updateGrams = (grams) => {
+    this.setState ({
+      grams: grams
     })
   }
   componentDidMount() {
@@ -254,7 +258,7 @@ class Accordian extends React.Component {
       //console.log('result', [result.foods[0].food]);
       this.setState({
         foodData: [result.foods[0].food],
-        customFoodData: [createFoodObject(result.foods[0].food)],
+        customFoodData: [createSimpleFoodObject(result.foods[0].food)],
         isLoading: false
       })
     })
@@ -264,10 +268,11 @@ class Accordian extends React.Component {
     });
   }
   render() {
-    const {data, foodData, customFoodData, currentIndex, isLoading, error} = this.state;
+    const {foodData, customFoodData, grams, currentIndex, isLoading, error} = this.state;
     //console.log('data', data);
     console.log('foodData', foodData);
     console.log('customFoodData', customFoodData);
+    console.log(this.updateGrams)
 
     const foodRenders = foodData.map((food, i) => {
       //console.log('food', food);
@@ -285,12 +290,68 @@ class Accordian extends React.Component {
           handleClick={this.handleClick}/>
       )
     })
+
+    const foodRenders2 = customFoodData.map((food, i) => {
+      return (
+        <Food2
+          key={i}
+          index={i}
+          name={food.name}
+          nutrients={food.nutrients}
+          grams={grams}
+          handleChange={this.updateGrams}
+          currentIndex={currentIndex}
+          handleClick={this.handleClick}/>
+      )
+    })
     
     return (
       error ? <span>Something went wrong...{error.message}</span> :
       isLoading ? <span>Loading...</span> :
       <div>
+        {foodRenders2}
         {foodRenders}
+      </div>
+    )
+  }
+}
+
+//This function is used to round a number 2 decimal places and seems to avoid issues with using Math.round and
+//the toFixed() method.
+const roundToTwo = (num) => {    
+  return +(Math.round(num + "e+2")  + "e-2");
+}
+//NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
+
+class Food2 extends React.Component {
+  handleClick = () => {
+    const {index, handleClick} = this.props;
+    handleClick(index);
+  }
+  handleChange = (event) => {
+    console.log('etv', event.target.value)
+    this.props.handleChange(event.target.value);
+  }
+  render() {
+    const {index, name, nutrients, grams, currentIndex} = this.props;
+    let current = currentIndex === index;
+    //console.log('Food2 nutrients', nutrients)
+
+    const nutrientRenders = nutrients.map((nutrient, i) => {
+      return (
+        <ul key={i}>
+          <li className='question' onClick={this.handleClick}>{nutrient.name}</li>
+          {current && <li className='answer'><ul>{`${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</ul></li>}
+        </ul>
+      )
+    })
+
+    return (
+      <div>
+        <h1>{name}</h1>
+        <span>Grams</span>
+        <input type='number' value={grams} onChange={this.handleChange}></input>
+        {nutrientRenders}
       </div>
     )
   }
@@ -310,7 +371,7 @@ class Food extends React.Component {
       return (
         <ul key={i}>
           <li className='question' onClick={this.handleClick}>{name}</li>
-          {current && <li className={current ? 'answer open' : 'answer'}><ul>{`${nutrient.value}${nutrient.unit}'s`}</ul></li>}
+          {current && <li className='answer'><ul>{`${nutrient.value}${nutrient.unit}'s`}</ul></li>}
         </ul>
       )
     })
@@ -335,6 +396,20 @@ ReactDOM.render(
 
 
 //CONTINUE INTEGRATING API INTO ACCORDIAN
+
+//As of 4/15/19 I have created 2 methods to render data from an API food report. The first is to pull data from
+//the report considering the format of the food report object and necessarily filtering the nested nutrient
+//object using a local object of nutrient ID's and preferred names. The second is to create a custom food
+//object from the API report when Fetching then writing the data display logic considering the custom object's
+//format with no need for filtering through nutrients or addeding logic for displaying preffered names of
+//nutrients (though it looks I'll still need either a local object or added logic to the custom object to
+//display prefferred food names).
+
+//As of now I'm not sure which of these methods will be best going forward. It looks like the second methods
+//results in more lines of code but makes the components more concise and understandable. One method may prove
+//preferrable over the other as I add secondary nutrients and increase functionality.
+
+
 
 
 
