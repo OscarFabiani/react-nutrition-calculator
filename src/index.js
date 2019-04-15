@@ -8,9 +8,10 @@ import './index.css';
 
 //API key: 5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j
 
+//01123
 
 //URL for USDA food item:
-const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=01123&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
+const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=16058&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
 
 //URL for food search:
 //const searchURL = 'https://api.nal.usda.gov/ndb/search/?format=json&q=egg&ds=Standard%20Reference&sort=r&max=10&offset=0&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
@@ -109,9 +110,21 @@ const logMeasures = (nutrient) => {
   })
 }
 
+//This function checks if a nutrient exists in a food report. This is meant to be used when creating custom
+//food objects from API food reports since some foods seem to ommitt certain key nutrients.
+//NOTE: Another approach would be to vet each food making sure each had all of the key nutrients present (or
+//limiting the key nutrients accordingly). Another approach would be to create logic that excludes any ommitted
+//nutrients from the custom food objects (if more suitable for functionalitly).
+const setNutrientValue = (nutrients, id) => {
+  const nutrient = nutrients.find(nutrient => nutrient.nutrient_id === id);
+  //Alterative value could be undefined (with no ternary),  null, 0, or something else depending on desired
+  //functionality.
+  return nutrient? nutrient.value : null;
+}
+
 
 const createFoodObject = (report) => {
-  console.log(report)
+  console.log('report: ', report);
   return {
     id: report.desc.ndbno,
     name: report.desc.name,
@@ -120,28 +133,28 @@ const createFoodObject = (report) => {
         id: 208,
         name: 'Calories',
         unit: 'kcals',
-        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 208).value,
+        value: setNutrientValue(report.nutrients, 208),
         measurements: {},
       },
       protein: {
         id: 203,
         name: 'Protein',
         unit: 'grams',
-        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 203).value,
+        value: setNutrientValue(report.nutrients, 203),
         measurements: {},
       },
       fat: {
         id: 204,
         name: 'Total Fat',
         unit: 'grams',
-        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 204).value,
+        value: setNutrientValue(report.nutrients, 204),
         measurements: {},
       },
       carbs: {
         id: 205,
         name: 'Total Carbs',
         unit: 'grams',
-        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 205).value,
+        value: setNutrientValue(report.nutrients, 205),
         measurements: {},
       },
       allCarbs: {
@@ -149,60 +162,59 @@ const createFoodObject = (report) => {
           id: 205,
           name: 'Total Carbs',
           unit: 'grams',
-          value: report.nutrients.find(nutrient => nutrient.nutrient_id === 205).value,
+          value: setNutrientValue(report.nutrients, 205),
           measurements: {},
         },
         fiber: {
           id: 291,
           name: 'Total Fiber',
           unit: 'grams',
-          value: report.nutrients.find(nutrient => nutrient.nutrient_id === 291).value,
+          value: setNutrientValue(report.nutrients, 291),
           measurements: {},
         },
-        //SOME FOOD REPORTS DON'T INCLUDE THIS NUTRIENT. ACCOUNT FOR THAT.
         sugars: {
           id: 269,
           name: 'Total Sugars',
           unit: 'grams',
-          value: report.nutrients.find(nutrient => nutrient.nutrient_id === 269).value,
+          value: setNutrientValue(report.nutrients, 269),
+          measurements: {},
+        }
+      },
+      allFats: {
+        totalFat: {
+          id: 204,
+          name: 'Total Fat',
+          unit: 'grams',
+          value: setNutrientValue(report.nutrients, 204),
           measurements: {},
         },
-        allFats: {
-          totalFat: {
-            id: 204,
-            name: 'Total Fat',
-            unit: 'grams',
-            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 204).value,
-            measurements: {},
-          },
-          satFat: {
-            id: 606,
-            name: 'Saturated Fat',
-            unit: 'grams',
-            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 606).value,
-            measurements: {},
-          },
-          monoFat: {
-            id: 645,
-            name: 'Monosaturated Fat',
-            unit: 'grams',
-            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 645).value,
-            measurements: {},
-          },
-          polyFat: {
-            id: 646,
-            name: 'Polyunsaturated Fat',
-            unit: 'grams',
-            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 646).value,
-            measurements: {},
-          },
-          transFat: {
-            id: 605,
-            name: 'Trans Fat',
-            unit: 'grams',
-            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 605).value,
-            measurements: {},
-          },
+        satFat: {
+          id: 606,
+          name: 'Saturated Fat',
+          unit: 'grams',
+          value: setNutrientValue(report.nutrients, 606),
+          measurements: {},
+        },
+        monoFat: {
+          id: 645,
+          name: 'Monosaturated Fat',
+          unit: 'grams',
+          value: setNutrientValue(report.nutrients, 645),
+          measurements: {},
+        },
+        polyFat: {
+          id: 646,
+          name: 'Polyunsaturated Fat',
+          unit: 'grams',
+          value: setNutrientValue(report.nutrients, 646),
+          measurements: {},
+        },
+        transFat: {
+          id: 605,
+          name: 'Trans Fat',
+          unit: 'grams',
+          value: setNutrientValue(report.nutrients, 605),
+          measurements: {},
         }
       }
     }
