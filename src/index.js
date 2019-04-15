@@ -110,7 +110,43 @@ const logMeasures = (nutrient) => {
 }
 
 
-
+const createFoodObject = (report) => {
+  console.log(report)
+  return {
+    id: report.desc.ndbno,
+    name: report.desc.name,
+    nutrients: {
+      calories: {
+        id: 208,
+        name: 'Calories',
+        unit: 'kcals',
+        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 208).value,
+        measurements: {},
+      },
+      protein: {
+        id: 203,
+        name: 'Protein',
+        unit: 'grams',
+        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 203).value,
+        measurements: {},
+      },
+      fat: {
+        id: 204,
+        name: 'Total Fat',
+        unit: 'grams',
+        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 204).value,
+        measurements: {},
+      },
+      carbs: {
+        id: 205,
+        name: 'Total Carbs',
+        unit: 'grams',
+        value: report.nutrients.find(nutrient => nutrient.nutrient_id === 205).value,
+        measurements: {},
+      }
+    }
+  }
+}
 
 
 
@@ -120,6 +156,7 @@ class Accordian extends React.Component {
   state = {
     data: [],
     foodData: [],
+    customFoodData: [],
     currentIndex: -1,
     isLoading: false,
     error: null
@@ -144,6 +181,7 @@ class Accordian extends React.Component {
       //console.log('result', [result.foods[0].food]);
       this.setState({
         foodData: [result.foods[0].food],
+        customFoodData: [createFoodObject(result.foods[0].food)],
         isLoading: false
       })
     })
@@ -153,9 +191,10 @@ class Accordian extends React.Component {
     });
   }
   render() {
-    const {data, foodData, currentIndex, isLoading, error} = this.state;
+    const {data, foodData, customFoodData, currentIndex, isLoading, error} = this.state;
     //console.log('data', data);
-    //console.log('foodData', foodData);
+    console.log('foodData', foodData);
+    console.log('customFoodData', customFoodData);
 
     const foodRenders = foodData.map((food, i) => {
       //console.log('food', food);
