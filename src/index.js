@@ -143,6 +143,67 @@ const createFoodObject = (report) => {
         unit: 'grams',
         value: report.nutrients.find(nutrient => nutrient.nutrient_id === 205).value,
         measurements: {},
+      },
+      allCarbs: {
+        totalCarbs: {
+          id: 205,
+          name: 'Total Carbs',
+          unit: 'grams',
+          value: report.nutrients.find(nutrient => nutrient.nutrient_id === 205).value,
+          measurements: {},
+        },
+        fiber: {
+          id: 291,
+          name: 'Total Fiber',
+          unit: 'grams',
+          value: report.nutrients.find(nutrient => nutrient.nutrient_id === 291).value,
+          measurements: {},
+        },
+        //SOME FOOD REPORTS DON'T INCLUDE THIS NUTRIENT. ACCOUNT FOR THAT.
+        sugars: {
+          id: 269,
+          name: 'Total Sugars',
+          unit: 'grams',
+          value: report.nutrients.find(nutrient => nutrient.nutrient_id === 269).value,
+          measurements: {},
+        },
+        allFats: {
+          totalFat: {
+            id: 204,
+            name: 'Total Fat',
+            unit: 'grams',
+            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 204).value,
+            measurements: {},
+          },
+          satFat: {
+            id: 606,
+            name: 'Saturated Fat',
+            unit: 'grams',
+            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 606).value,
+            measurements: {},
+          },
+          monoFat: {
+            id: 645,
+            name: 'Monosaturated Fat',
+            unit: 'grams',
+            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 645).value,
+            measurements: {},
+          },
+          polyFat: {
+            id: 646,
+            name: 'Polyunsaturated Fat',
+            unit: 'grams',
+            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 646).value,
+            measurements: {},
+          },
+          transFat: {
+            id: 605,
+            name: 'Trans Fat',
+            unit: 'grams',
+            value: report.nutrients.find(nutrient => nutrient.nutrient_id === 605).value,
+            measurements: {},
+          },
+        }
       }
     }
   }
