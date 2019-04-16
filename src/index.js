@@ -8,10 +8,15 @@ import './index.css';
 
 //API key: 5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j
 
-//01123
+//Eggs 01123
+//Chickpeas 16058
+//Black beans 16018
+//Coconut oil 04047
+//Olive oil 04053
+//Sardines 15088
 
 //URL for USDA food item:
-const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=01123&ndbno=16058&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
+const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&ndbno=16358&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
 
 //URL for food search:
 //const searchURL = 'https://api.nal.usda.gov/ndb/search/?format=json&q=egg&ds=Standard%20Reference&sort=r&max=10&offset=0&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
@@ -232,10 +237,8 @@ const createComplexFoodObject = (report) => {
 //A component that displays JSON data as an accordian.
 class Accordian extends React.Component {
   state = {
-    foodData: [],
-    customFoodData: [],
     customFoodData2: [],
-    grams: 200,
+    grams: 100,
     currentIndex: -1,
     isLoading: false,
     error: null
@@ -265,7 +268,6 @@ class Accordian extends React.Component {
       //console.log('result', [result.foods[0].food]);
       this.setState({
         foodData: [result.foods[0].food],
-        customFoodData: [createSimpleFoodObject(result.foods[0].food)],
         customFoodData2: createSimpleFoodObjects(result.foods),
         isLoading: false
       })
@@ -276,10 +278,7 @@ class Accordian extends React.Component {
     });
   }
   render() {
-    const {foodData, customFoodData, customFoodData2, grams, currentIndex, isLoading, error} = this.state;
-    //console.log('data', data);
-    //console.log('foodData', foodData);
-    console.log('customFoodData', customFoodData);
+    const {customFoodData2, grams, currentIndex, isLoading, error} = this.state;
     console.log('customFoodData2', customFoodData2);
 
     const foodRenders3 = customFoodData2.map((food, i) => {
@@ -319,7 +318,6 @@ class Food3 extends React.Component {
     handleClick(index);
   }
   handleChange = (event) => {
-    console.log('etv', event.target.value)
     this.props.handleChange(event.target.value);
   }
   render() {
@@ -338,7 +336,7 @@ class Food3 extends React.Component {
 
     return (
       <div>
-        <h1>{name}</h1>
+        <h3>{name}</h3>
         <span>Grams</span>
         <input type='number' value={grams} onChange={this.handleChange}></input>
         {nutrientRenders}
