@@ -20,6 +20,8 @@ const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047
 
 const foodNames = ['Olive oil', 'Coconut oil', 'Eggs', 'Chickpeas', 'Black beans', 'Sardines'];
 
+
+
 const nutrientIDs = [
   {
     name: 'Calories',
@@ -271,7 +273,7 @@ class Accordian extends React.Component {
     newFoodFat.splice(index, 1, grams * customFoodData2[index].nutrients[2].value / 100);
 
     const newFoodCarbs = [...foodCarbs];
-    newFoodCarbs.splice(index, 1, grams * customFoodData2[index].nutrients[0].value / 100);
+    newFoodCarbs.splice(index, 1, grams * customFoodData2[index].nutrients[3].value / 100);
 
     this.setState ({
       foodGrams: newFoodGrams,
@@ -300,7 +302,6 @@ class Accordian extends React.Component {
     .then(result => {
       //console.log('result', [result.foods[0].food]);
       this.setState({
-        foodData: [result.foods[0].food],
         customFoodData2: createSimpleFoodObjects(result.foods),
         isLoading: false
       })
@@ -365,10 +366,7 @@ class Food3 extends React.Component {
 
     const nutrientRenders = nutrients.map((nutrient, i) => {
       return (
-        <ul key={i}>
-          <li className='question' onClick={this.handleClick}>{nutrient.name}</li>
-          {current && <li className='answer'><ul>{`${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</ul></li>}
-        </ul>
+          <li key={i} className='answer'>{`${nutrient.name} ${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</li>
       )
     })
 
@@ -379,9 +377,8 @@ class Food3 extends React.Component {
         <input type='number' value={grams} onChange={this.handleChange}></input>
         <ul>
           <li className='question' onClick={this.handleClick}>Details</li>
-          {current && <li className='answer'><ul>test</ul></li>}
+          {current && <ul>{nutrientRenders}</ul>}
         </ul>
-        {nutrientRenders}
       </div>
     )
   }
