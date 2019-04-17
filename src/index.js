@@ -16,12 +16,9 @@ import './index.css';
 //Sardines 15088
 
 //URL for USDA food item:
-const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&ndbno=16358&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
+const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
 
-//URL for food search:
-//const searchURL = 'https://api.nal.usda.gov/ndb/search/?format=json&q=egg&ds=Standard%20Reference&sort=r&max=10&offset=0&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j'
-
-
+const foodNames = ['Olive oil', 'Coconut oil', 'Eggs', 'Chickpeas', 'Black beans', 'Sardines'];
 
 const nutrientIDs = [
   {
@@ -234,23 +231,59 @@ const createComplexFoodObject = (report) => {
 
 
 
+//This function is used to round a number 2 decimal places and seems to avoid issues with using Math.round and
+//the toFixed() method.
+const roundToTwo = (num) => {    
+  return +(Math.round(num + "e+2")  + "e-2");
+}
+//NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
+
+
 //A component that displays JSON data as an accordian.
 class Accordian extends React.Component {
   state = {
     customFoodData2: [],
-    grams: 100,
+    foodGrams: [0, 0, 0, 0, 0, 0],
+    foodCals: [0, 0, 0, 0, 0, 0],
+    foodProtein: [0, 0, 0, 0, 0, 0],
+    foodFat: [0, 0, 0, 0, 0, 0],
+    foodCarbs: [0, 0, 0, 0, 0, 0],
     currentIndex: -1,
     isLoading: false,
     error: null
   }
+  updateTotals = (grams, index) => {
+    const {customFoodData2, foodGrams, foodCals, foodProtein, foodFat, foodCarbs} = this.state;
+    //console.log('grams', grams);
+
+    const newFoodGrams = [...foodGrams];
+    newFoodGrams.splice(index, 1, Number(grams));
+    //console.log(newFoodGrams);
+
+    const newFoodCals = [...foodCals];
+    newFoodCals.splice(index, 1, grams * customFoodData2[index].nutrients[0].value / 100);
+    //console.log('newFoodCals', newFoodCals);
+
+    const newFoodProtein = [...foodProtein];
+    newFoodProtein.splice(index, 1, grams * customFoodData2[index].nutrients[1].value / 100);
+
+    const newFoodFat = [...foodFat];
+    newFoodFat.splice(index, 1, grams * customFoodData2[index].nutrients[2].value / 100);
+
+    const newFoodCarbs = [...foodCarbs];
+    newFoodCarbs.splice(index, 1, grams * customFoodData2[index].nutrients[0].value / 100);
+
+    this.setState ({
+      foodGrams: newFoodGrams,
+      foodCals: newFoodCals,
+      foodProtein: newFoodProtein,
+      foodFat: newFoodFat,
+      foodCarbs: newFoodCarbs,
+    })
+  }
   handleClick = (i) => {
     this.setState (prevState => {
       return {currentIndex: prevState.currentIndex === i ? -1 : i}
-    })
-  }
-  updateGrams = (grams) => {
-    this.setState ({
-      grams: grams
     })
   }
   componentDidMount() {
@@ -278,18 +311,25 @@ class Accordian extends React.Component {
     });
   }
   render() {
-    const {customFoodData2, grams, currentIndex, isLoading, error} = this.state;
-    console.log('customFoodData2', customFoodData2);
+    const {customFoodData2, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, currentIndex, isLoading, error} = this.state;
+    const totalGrams = foodGrams.reduce((t, g) => t + g, 0);
+    const totalCalories = roundToTwo(foodCals.reduce((t, g) => t + g, 0));
+    const totalProtein = roundToTwo(foodProtein.reduce((t, g) => t + g, 0));
+    const totalFat = roundToTwo(foodFat.reduce((t, g) => t + g, 0));
+    const totalCarbs = roundToTwo(foodCarbs.reduce((t, g) => t + g, 0));
+
+    //console.log('customFoodData2', customFoodData2);
+    //console.log('foodGrams', foodGrams);
 
     const foodRenders3 = customFoodData2.map((food, i) => {
       return (
         <Food3
           key={i}
           index={i}
-          name={food.name}
+          name={foodNames[i]}
           nutrients={food.nutrients}
-          grams={grams}
-          handleChange={this.updateGrams}
+          grams={foodGrams[i]}
+          handleChange={this.updateTotals}
           currentIndex={currentIndex}
           handleClick={this.handleClick}/>
       )
@@ -299,18 +339,16 @@ class Accordian extends React.Component {
       error ? <span>Something went wrong...{error.message}</span> :
       isLoading ? <span>Loading...</span> :
       <div>
+        <h4>Total Grams: {totalGrams}</h4>
+        <h4>Total Calories: {totalCalories}</h4>
+        <h4>Total Protein: {totalProtein}</h4>
+        <h4>Total Fat: {totalFat}</h4>
+        <h4>Total Carbs: {totalCarbs}</h4>
         {foodRenders3}
       </div>
     )
   }
 }
-
-//This function is used to round a number 2 decimal places and seems to avoid issues with using Math.round and
-//the toFixed() method.
-const roundToTwo = (num) => {    
-  return +(Math.round(num + "e+2")  + "e-2");
-}
-//NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
 
 class Food3 extends React.Component {
   handleClick = () => {
@@ -318,12 +356,12 @@ class Food3 extends React.Component {
     handleClick(index);
   }
   handleChange = (event) => {
-    this.props.handleChange(event.target.value);
+    this.props.handleChange(event.target.value, this.props.index);
   }
   render() {
     const {index, name, nutrients, grams, currentIndex} = this.props;
     let current = currentIndex === index;
-    //console.log('Food2 nutrients', nutrients)
+    //console.log('Food3 nutrients', nutrients)
 
     const nutrientRenders = nutrients.map((nutrient, i) => {
       return (
@@ -339,11 +377,16 @@ class Food3 extends React.Component {
         <h3>{name}</h3>
         <span>Grams</span>
         <input type='number' value={grams} onChange={this.handleChange}></input>
+        <ul>
+          <li className='question' onClick={this.handleClick}>Details</li>
+          {current && <li className='answer'><ul>test</ul></li>}
+        </ul>
         {nutrientRenders}
       </div>
     )
   }
 }
+
 
 
 
