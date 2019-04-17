@@ -22,56 +22,6 @@ const foodNames = ['Olive oil', 'Coconut oil', 'Eggs', 'Chickpeas', 'Black beans
 
 
 
-const nutrientIDs = [
-  {
-    name: 'Calories',
-    id: 208
-  }, 
-  {
-    name: 'Protein',
-    id: 203
-  },
-  {
-    name: 'Total Fat',
-    id: 204
-  },
-  {
-    name: 'Carbs "by difference"',
-    id: 205
-  }
-]
-
-
-const carbIDs = [
-  {
-    name: 'Total Dietary Fiber',
-    id: 291
-  },
-  {
-    name: 'Total Sugars',
-    id: 269
-  }
-]
-
-const fatIDs = [
-  {
-    name: 'Saturated Fat',
-    id: 606
-  },
-  {
-    name: 'Monosaturated Fat',
-    id: 645
-  },
-  {
-    name: 'Polyunsaturated Fat',
-    id: 646
-  },
-  {
-    name: 'Trans Fat',
-    id: 605
-  }
-]
-
 
 //This function checks if a nutrient exists in a food report. This is meant to be used when creating custom
 //food objects from API food reports since some foods seem to ommitt certain key nutrients.
@@ -128,6 +78,261 @@ const createSimpleFoodObject = (report) => {
   }
 }
 
+
+//This function is used to round a number 2 decimal places and seems to avoid issues with using Math.round and
+//the toFixed() method.
+const roundToTwo = (num) => {    
+  return +(Math.round(num + "e+2")  + "e-2");
+}
+//NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
+
+
+
+
+class Calculator extends React.Component {
+  state = {
+    foodData: [],
+    foodGrams: [0, 0, 0, 0, 0, 0],
+    foodCals: [0, 0, 0, 0, 0, 0],
+    foodProtein: [0, 0, 0, 0, 0, 0],
+    foodFat: [0, 0, 0, 0, 0, 0],
+    foodCarbs: [0, 0, 0, 0, 0, 0],
+    currentIndex: -1,
+    isLoading: false,
+    error: null
+  }
+
+  updateTotals = (grams, index) => {
+    const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs} = this.state;
+
+    const newFoodGrams = [
+      ...foodGrams.slice(0, index),
+      Number(grams),
+      ...foodGrams.slice(index + 1)
+    ];
+
+    const newFoodCals = [
+      ...foodCals.slice(0, index),
+      grams * foodData[index].nutrients[0].value / 100,
+      ...foodCals.slice(index + 1)
+    ];
+
+    const newFoodProtein = [
+      ...foodProtein.slice(0, index),
+      grams * foodData[index].nutrients[1].value / 100,
+      ...foodProtein.slice(index + 1)
+    ];
+
+    const newFoodFat = [
+      ...foodFat.slice(0, index),
+      grams * foodData[index].nutrients[2].value / 100,
+      ...foodFat.slice(index + 1)
+    ];
+
+    const newFoodCarbs = [
+      ...foodCarbs.slice(0, index),
+      grams * foodData[index].nutrients[3].value / 100,
+      ...foodCarbs.slice(index + 1)
+    ];
+
+    this.setState ({
+      foodGrams: newFoodGrams,
+      foodCals: newFoodCals,
+      foodProtein: newFoodProtein,
+      foodFat: newFoodFat,
+      foodCarbs: newFoodCarbs,
+    })
+  }
+
+  handleClick = (i) => {
+    this.setState (prevState => {
+      return {currentIndex: prevState.currentIndex === i ? -1 : i}
+    })
+  }
+
+  componentDidMount() {
+    this.setState({isLoading: true})
+
+    fetch(itemURL)
+    .then(result => {
+      if (result.ok) {
+        return result.json();
+      } else {
+        return;
+      }
+    })
+    .then(result => {
+      //console.log('result', [result.foods[0].food]);
+      this.setState({
+        foodData: createSimpleFoodObjects(result.foods),
+        isLoading: false
+      })
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      this.setState({error})
+    });
+  }
+  
+  render() {
+    const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, currentIndex, isLoading, error} = this.state;
+    const totalGrams = foodGrams.reduce((t, g) => t + g, 0);
+    const totalCalories = roundToTwo(foodCals.reduce((t, g) => t + g, 0));
+    const totalProtein = roundToTwo(foodProtein.reduce((t, g) => t + g, 0));
+    const totalFat = roundToTwo(foodFat.reduce((t, g) => t + g, 0));
+    const totalCarbs = roundToTwo(foodCarbs.reduce((t, g) => t + g, 0));
+
+    //console.log('customFoodData2', customFoodData2);
+    //console.log('foodGrams', foodGrams);
+
+    const foodRenders3 = foodData.map((food, i) => {
+      return (
+        <Food3
+          key={i}
+          index={i}
+          name={foodNames[i]}
+          nutrients={food.nutrients}
+          grams={foodGrams[i]}
+          handleChange={this.updateTotals}
+          currentIndex={currentIndex}
+          handleClick={this.handleClick}/>
+      )
+    })
+    
+    return (
+      error ? <span>Something went wrong...{error.message}</span> :
+      isLoading ? <span>Loading...</span> :
+      <div>
+        <h4>Total Grams: {totalGrams}</h4>
+        <h4>Total Calories: {totalCalories}</h4>
+        <h4>Total Protein: {totalProtein}</h4>
+        <h4>Total Fat: {totalFat}</h4>
+        <h4>Total Carbs: {totalCarbs}</h4>
+        {foodRenders3}
+      </div>
+    )
+  }
+}
+
+class Food3 extends React.Component {
+  handleClick = () => {
+    const {index, handleClick} = this.props;
+    handleClick(index);
+  }
+  handleChange = (event) => {
+    this.props.handleChange(event.target.value, this.props.index);
+  }
+  render() {
+    const {index, name, nutrients, grams, currentIndex} = this.props;
+    let current = currentIndex === index;
+    //console.log('Food3 nutrients', nutrients)
+
+    const nutrientRenders = nutrients.map((nutrient, i) => {
+      return (
+          <li key={i} className='answer'>{`${nutrient.name} ${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</li>
+      )
+    })
+
+    return (
+      <div>
+        <h3>{name}</h3>
+        <span>Grams</span>
+        <input type='number' value={grams} onChange={this.handleChange}></input>
+        <ul>
+          <li className='question' onClick={this.handleClick}>Details</li>
+          {current && <ul>{nutrientRenders}</ul>}
+        </ul>
+      </div>
+    )
+  }
+}
+
+
+
+
+
+ReactDOM.render(
+  <Calculator />,
+  document.getElementById('root')
+);
+
+
+//FIGURE WHERE THE STATE FOR EACH FOODS' GRAMS SHOULD LIVE AND THE SUPPORTING LOGIC
+//DELETE/ARCHIVE OLD LOGIC
+
+//As of 4/15/19 I have created 2 methods to render data from an API food report. The first is to pull data from
+//the report considering the format of the food report object and necessarily filtering the nested nutrient
+//object using a local object of nutrient ID's and preferred names. The second is to create a custom food
+//object from the API report when Fetching then writing the data display logic considering the custom object's
+//format with no need for filtering through nutrients or addeding logic for displaying preffered names of
+//nutrients (though it looks I'll still need either a local object or added logic to the custom object to
+//display prefferred food names).
+
+//As of now I'm not sure which of these methods will be best going forward. It looks like the second methods
+//results in more lines of code but makes the components more concise and understandable. One method may prove
+//preferrable over the other as I add secondary nutrients and increase functionality.
+
+
+
+
+
+//These objects haven't been necessary yet.
+/*
+const nutrientIDs = [
+  {
+    name: 'Calories',
+    id: 208
+  }, 
+  {
+    name: 'Protein',
+    id: 203
+  },
+  {
+    name: 'Total Fat',
+    id: 204
+  },
+  {
+    name: 'Carbs "by difference"',
+    id: 205
+  }
+]
+
+
+const carbIDs = [
+  {
+    name: 'Total Dietary Fiber',
+    id: 291
+  },
+  {
+    name: 'Total Sugars',
+    id: 269
+  }
+]
+
+const fatIDs = [
+  {
+    name: 'Saturated Fat',
+    id: 606
+  },
+  {
+    name: 'Monosaturated Fat',
+    id: 645
+  },
+  {
+    name: 'Polyunsaturated Fat',
+    id: 646
+  },
+  {
+    name: 'Trans Fat',
+    id: 605
+  }
+]
+*/
+
+
+//This function seems to be unnecessary due to it's complexity (currently using a function that creates a
+//simpler object).
+/*
 //THIS FUNCTION LIKELY NEEDS TO BE REFACTORED TO INCLUDE NESTED ARRAYS OF OBJECTS FOR MAPPING (SIMILAR TO
 //createSimpleObject()).
 const createComplexFoodObject = (report) => {
@@ -227,187 +432,7 @@ const createComplexFoodObject = (report) => {
     }
   }
 }
-
-
-
-
-
-
-//This function is used to round a number 2 decimal places and seems to avoid issues with using Math.round and
-//the toFixed() method.
-const roundToTwo = (num) => {    
-  return +(Math.round(num + "e+2")  + "e-2");
-}
-//NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
-
-
-//A component that displays JSON data as an accordian.
-class Accordian extends React.Component {
-  state = {
-    customFoodData2: [],
-    foodGrams: [0, 0, 0, 0, 0, 0],
-    foodCals: [0, 0, 0, 0, 0, 0],
-    foodProtein: [0, 0, 0, 0, 0, 0],
-    foodFat: [0, 0, 0, 0, 0, 0],
-    foodCarbs: [0, 0, 0, 0, 0, 0],
-    currentIndex: -1,
-    isLoading: false,
-    error: null
-  }
-  updateTotals = (grams, index) => {
-    const {customFoodData2, foodGrams, foodCals, foodProtein, foodFat, foodCarbs} = this.state;
-    //console.log('grams', grams);
-
-    const newFoodGrams = [...foodGrams];
-    newFoodGrams.splice(index, 1, Number(grams));
-    //console.log(newFoodGrams);
-
-    const newFoodCals = [...foodCals];
-    newFoodCals.splice(index, 1, grams * customFoodData2[index].nutrients[0].value / 100);
-    //console.log('newFoodCals', newFoodCals);
-
-    const newFoodProtein = [...foodProtein];
-    newFoodProtein.splice(index, 1, grams * customFoodData2[index].nutrients[1].value / 100);
-
-    const newFoodFat = [...foodFat];
-    newFoodFat.splice(index, 1, grams * customFoodData2[index].nutrients[2].value / 100);
-
-    const newFoodCarbs = [...foodCarbs];
-    newFoodCarbs.splice(index, 1, grams * customFoodData2[index].nutrients[3].value / 100);
-
-    this.setState ({
-      foodGrams: newFoodGrams,
-      foodCals: newFoodCals,
-      foodProtein: newFoodProtein,
-      foodFat: newFoodFat,
-      foodCarbs: newFoodCarbs,
-    })
-  }
-  handleClick = (i) => {
-    this.setState (prevState => {
-      return {currentIndex: prevState.currentIndex === i ? -1 : i}
-    })
-  }
-  componentDidMount() {
-    this.setState({isLoading: true})
-
-    fetch(itemURL)
-    .then(result => {
-      if (result.ok) {
-        return result.json();
-      } else {
-        return;
-      }
-    })
-    .then(result => {
-      //console.log('result', [result.foods[0].food]);
-      this.setState({
-        customFoodData2: createSimpleFoodObjects(result.foods),
-        isLoading: false
-      })
-    })
-    .catch(error => {
-      console.log('error: ', error);
-      this.setState({error})
-    });
-  }
-  render() {
-    const {customFoodData2, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, currentIndex, isLoading, error} = this.state;
-    const totalGrams = foodGrams.reduce((t, g) => t + g, 0);
-    const totalCalories = roundToTwo(foodCals.reduce((t, g) => t + g, 0));
-    const totalProtein = roundToTwo(foodProtein.reduce((t, g) => t + g, 0));
-    const totalFat = roundToTwo(foodFat.reduce((t, g) => t + g, 0));
-    const totalCarbs = roundToTwo(foodCarbs.reduce((t, g) => t + g, 0));
-
-    //console.log('customFoodData2', customFoodData2);
-    //console.log('foodGrams', foodGrams);
-
-    const foodRenders3 = customFoodData2.map((food, i) => {
-      return (
-        <Food3
-          key={i}
-          index={i}
-          name={foodNames[i]}
-          nutrients={food.nutrients}
-          grams={foodGrams[i]}
-          handleChange={this.updateTotals}
-          currentIndex={currentIndex}
-          handleClick={this.handleClick}/>
-      )
-    })
-    
-    return (
-      error ? <span>Something went wrong...{error.message}</span> :
-      isLoading ? <span>Loading...</span> :
-      <div>
-        <h4>Total Grams: {totalGrams}</h4>
-        <h4>Total Calories: {totalCalories}</h4>
-        <h4>Total Protein: {totalProtein}</h4>
-        <h4>Total Fat: {totalFat}</h4>
-        <h4>Total Carbs: {totalCarbs}</h4>
-        {foodRenders3}
-      </div>
-    )
-  }
-}
-
-class Food3 extends React.Component {
-  handleClick = () => {
-    const {index, handleClick} = this.props;
-    handleClick(index);
-  }
-  handleChange = (event) => {
-    this.props.handleChange(event.target.value, this.props.index);
-  }
-  render() {
-    const {index, name, nutrients, grams, currentIndex} = this.props;
-    let current = currentIndex === index;
-    //console.log('Food3 nutrients', nutrients)
-
-    const nutrientRenders = nutrients.map((nutrient, i) => {
-      return (
-          <li key={i} className='answer'>{`${nutrient.name} ${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</li>
-      )
-    })
-
-    return (
-      <div>
-        <h3>{name}</h3>
-        <span>Grams</span>
-        <input type='number' value={grams} onChange={this.handleChange}></input>
-        <ul>
-          <li className='question' onClick={this.handleClick}>Details</li>
-          {current && <ul>{nutrientRenders}</ul>}
-        </ul>
-      </div>
-    )
-  }
-}
-
-
-
-
-
-ReactDOM.render(
-  <Accordian />,
-  document.getElementById('root')
-);
-
-
-//FIGURE WHERE THE STATE FOR EACH FOODS' GRAMS SHOULD LIVE AND THE SUPPORTING LOGIC
-//DELETE/ARCHIVE OLD LOGIC
-
-//As of 4/15/19 I have created 2 methods to render data from an API food report. The first is to pull data from
-//the report considering the format of the food report object and necessarily filtering the nested nutrient
-//object using a local object of nutrient ID's and preferred names. The second is to create a custom food
-//object from the API report when Fetching then writing the data display logic considering the custom object's
-//format with no need for filtering through nutrients or addeding logic for displaying preffered names of
-//nutrients (though it looks I'll still need either a local object or added logic to the custom object to
-//display prefferred food names).
-
-//As of now I'm not sure which of these methods will be best going forward. It looks like the second methods
-//results in more lines of code but makes the components more concise and understandable. One method may prove
-//preferrable over the other as I add secondary nutrients and increase functionality.
+*/
 
 
 
