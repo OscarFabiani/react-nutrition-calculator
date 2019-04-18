@@ -15,11 +15,6 @@ import './index.css';
 //Olive oil 04053
 //Sardines 15088
 
-//URL for USDA food item:
-const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
-
-const foodNames = ['Olive oil', 'Coconut oil', 'Eggs', 'Chickpeas', 'Black beans', 'Sardines'];
-
 
 
 
@@ -35,43 +30,41 @@ const setNutrientValue = (nutrients, id) => {
   return nutrient? nutrient.value : null;
 }
 
-const createSimpleFoodObjects = (reports) => {
-  //console.log('reports', reports);
-  return reports.map(food => createSimpleFoodObject(food.food));
+const createFoodObjects = (foods) => {
+  return foods.map(food => createFoodObject(food.food));
 }
 
-const createSimpleFoodObject = (report) => {
-  //console.log('report: ', report);
+const createFoodObject = (food) => {
   return {
-    id: report.desc.ndbno,
-    name: report.desc.name,
+    id: food.desc.ndbno,
+    name: food.desc.name,
     nutrients: [
       {
         id: 208,
         name: 'Calories',
         unit: 'kcals',
-        value: setNutrientValue(report.nutrients, 208),
+        value: setNutrientValue(food.nutrients, 208),
         measurements: {},
       },
       {
         id: 203,
         name: 'Protein',
         unit: 'grams',
-        value: setNutrientValue(report.nutrients, 203),
+        value: setNutrientValue(food.nutrients, 203),
         measurements: {},
       },
       {
         id: 204,
-        name: 'Total Fat',
+        name: 'Fat',
         unit: 'grams',
-        value: setNutrientValue(report.nutrients, 204),
+        value: setNutrientValue(food.nutrients, 204),
         measurements: {},
       },
       {
         id: 205,
-        name: 'Total Carbs',
+        name: 'Carbs',
         unit: 'grams',
-        value: setNutrientValue(report.nutrients, 205),
+        value: setNutrientValue(food.nutrients, 205),
         measurements: {},
       },
     ]
@@ -87,6 +80,10 @@ const roundToTwo = (num) => {
 //NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
 
 
+//URL for USDA food item:
+const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
+
+const foodNames = ['Olive oil', 'Coconut oil', 'Eggs', 'Chickpeas', 'Black beans', 'Sardines'];
 
 
 class Calculator extends React.Component {
@@ -97,7 +94,7 @@ class Calculator extends React.Component {
     foodProtein: [0, 0, 0, 0, 0, 0],
     foodFat: [0, 0, 0, 0, 0, 0],
     foodCarbs: [0, 0, 0, 0, 0, 0],
-    expansions: [false, true, false, false, false, false],
+    expansions: [false, false, false, false, false, false],
     isLoading: false,
     error: null
   }
@@ -144,16 +141,16 @@ class Calculator extends React.Component {
     })
   }
 
-  handleClick = (i) => {
+  toggleExpansion = (index) => {
     const {expansions} = this.state
     this.setState (prevState => {
-      return {expansions: prevState.expansions[i] ? [
-        ...expansions.slice(0, i),
+      return {expansions: prevState.expansions[index] ? [
+        ...expansions.slice(0, index),
         false,
-        ...expansions.slice(i + 1)] : [
-          ...expansions.slice(0, i),
+        ...expansions.slice(index + 1)] : [
+          ...expansions.slice(0, index),
           true,
-          ...expansions.slice(i + 1)
+          ...expansions.slice(index + 1)
         ]}
     })
   }
@@ -170,9 +167,8 @@ class Calculator extends React.Component {
       }
     })
     .then(result => {
-      //console.log('result', [result.foods[0].food]);
       this.setState({
-        foodData: createSimpleFoodObjects(result.foods),
+        foodData: createFoodObjects(result.foods),
         isLoading: false
       })
     })
@@ -184,16 +180,10 @@ class Calculator extends React.Component {
   
   render() {
     const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, expansions, isLoading, error} = this.state;
-    const totalGrams = foodGrams.reduce((t, g) => t + g, 0);
-    const totalCalories = roundToTwo(foodCals.reduce((t, g) => t + g, 0));
-    const totalProtein = roundToTwo(foodProtein.reduce((t, g) => t + g, 0));
-    const totalFat = roundToTwo(foodFat.reduce((t, g) => t + g, 0));
-    const totalCarbs = roundToTwo(foodCarbs.reduce((t, g) => t + g, 0));
+    
+    const calcTotal = (nutrientArray) => roundToTwo(nutrientArray.reduce((t, g) => t + g, 0));
 
-    //console.log('customFoodData2', customFoodData2);
-    //console.log('foodGrams', foodGrams);
-
-    const foodRenders3 = foodData.map((food, i) => {
+    const foodRenders = foodData.map((food, i) => {
       return (
         <Food
           key={i}
@@ -201,9 +191,9 @@ class Calculator extends React.Component {
           name={foodNames[i]}
           nutrients={food.nutrients}
           grams={foodGrams[i]}
-          handleChange={this.updateTotals}
+          updateTotals={this.updateTotals}
           isExpanded={expansions[i]}
-          handleClick={this.handleClick}/>
+          toggleExpansion={this.toggleExpansion}/>
       )
     })
     
@@ -212,13 +202,15 @@ class Calculator extends React.Component {
       isLoading ? <span>Loading...</span> :
       <div>
         <div className='meal'>
-          <span>Total Grams: {totalGrams}</span>
-          <span>Total Calories: {totalCalories}</span>
-          <span>Total Protein: {totalProtein} grams</span>
-          <span>Total Fat: {totalFat} grams</span>
-          <span>Total Carbs: {totalCarbs} grams</span>
+          <span className='total'>Total Grams: {calcTotal(foodGrams)}</span>
+          <span className='total'>Total Calories: {calcTotal(foodCals)}</span>
+          <span className='total'>Total Protein: {calcTotal(foodProtein)} grams</span>
+          <span className='total'>Total Fat: {calcTotal(foodFat)} grams</span>
+          <span className='total'>Total Carbs: {calcTotal(foodCarbs)} grams</span>
         </div>
-        {foodRenders3}
+        <div className='foods'>
+          {foodRenders}
+        </div>
       </div>
     )
   }
@@ -226,31 +218,33 @@ class Calculator extends React.Component {
 
 class Food extends React.Component {
   handleClick = () => {
-    const {index, handleClick} = this.props;
-    handleClick(index);
+    const {index, toggleExpansion} = this.props;
+    toggleExpansion(index);
   }
   handleChange = (event) => {
-    const {index, handleChange} = this.props;
-    handleChange(event.target.value, index);
+    const {index, updateTotals} = this.props;
+    updateTotals(event.target.value, index);
   }
   render() {
     const {name, nutrients, grams, isExpanded} = this.props;
 
     const nutrientRenders = nutrients.map((nutrient, i) => {
       return (
-          <li key={i} className='answer'>{`${nutrient.name} ${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</li>
+          <li key={i} className='answer'>{`${nutrient.name}: ${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</li>
       )
     })
 
     return (
-      <div>
+      <div className='food'>
         <h3>{name}</h3>
-        <span>Grams</span>
-        <input type='number' value={grams} onChange={this.handleChange}></input>
-        <ul>
+        <div>
+          <input  className='input' type='number' value={grams} onChange={this.handleChange}></input>
+          <span>Grams</span>
+        </div>
+        <div>
           <li className='question' onClick={this.handleClick}>Details</li>
           {isExpanded && <ul>{nutrientRenders}</ul>}
-        </ul>
+        </div>
       </div>
     )
   }
@@ -266,8 +260,7 @@ ReactDOM.render(
 );
 
 
-//FIGURE WHERE THE STATE FOR EACH FOODS' GRAMS SHOULD LIVE AND THE SUPPORTING LOGIC
-//DELETE/ARCHIVE OLD LOGIC
+//
 
 //As of 4/15/19 I have created 2 methods to render data from an API food report. The first is to pull data from
 //the report considering the format of the food report object and necessarily filtering the nested nutrient
