@@ -12,6 +12,12 @@ ul {
   list-style: disc;
 }
 
+.meal {
+  display: flex;
+  justify-content: space-between;
+  background-color: aqua;
+}
+
 .question {
   background: #00d7825c;
   box-shadow: -1px -1px 3px 0px #1a1a1a4f;

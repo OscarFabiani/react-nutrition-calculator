@@ -97,7 +97,7 @@ class Calculator extends React.Component {
     foodProtein: [0, 0, 0, 0, 0, 0],
     foodFat: [0, 0, 0, 0, 0, 0],
     foodCarbs: [0, 0, 0, 0, 0, 0],
-    currentIndex: -1,
+    expansions: [false, true, false, false, false, false],
     isLoading: false,
     error: null
   }
@@ -145,8 +145,16 @@ class Calculator extends React.Component {
   }
 
   handleClick = (i) => {
+    const {expansions} = this.state
     this.setState (prevState => {
-      return {currentIndex: prevState.currentIndex === i ? -1 : i}
+      return {expansions: prevState.expansions[i] ? [
+        ...expansions.slice(0, i),
+        false,
+        ...expansions.slice(i + 1)] : [
+          ...expansions.slice(0, i),
+          true,
+          ...expansions.slice(i + 1)
+        ]}
     })
   }
 
@@ -175,7 +183,7 @@ class Calculator extends React.Component {
   }
   
   render() {
-    const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, currentIndex, isLoading, error} = this.state;
+    const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, expansions, isLoading, error} = this.state;
     const totalGrams = foodGrams.reduce((t, g) => t + g, 0);
     const totalCalories = roundToTwo(foodCals.reduce((t, g) => t + g, 0));
     const totalProtein = roundToTwo(foodProtein.reduce((t, g) => t + g, 0));
@@ -187,14 +195,14 @@ class Calculator extends React.Component {
 
     const foodRenders3 = foodData.map((food, i) => {
       return (
-        <Food3
+        <Food
           key={i}
           index={i}
           name={foodNames[i]}
           nutrients={food.nutrients}
           grams={foodGrams[i]}
           handleChange={this.updateTotals}
-          currentIndex={currentIndex}
+          isExpanded={expansions[i]}
           handleClick={this.handleClick}/>
       )
     })
@@ -203,29 +211,30 @@ class Calculator extends React.Component {
       error ? <span>Something went wrong...{error.message}</span> :
       isLoading ? <span>Loading...</span> :
       <div>
-        <h4>Total Grams: {totalGrams}</h4>
-        <h4>Total Calories: {totalCalories}</h4>
-        <h4>Total Protein: {totalProtein}</h4>
-        <h4>Total Fat: {totalFat}</h4>
-        <h4>Total Carbs: {totalCarbs}</h4>
+        <div className='meal'>
+          <span>Total Grams: {totalGrams}</span>
+          <span>Total Calories: {totalCalories}</span>
+          <span>Total Protein: {totalProtein} grams</span>
+          <span>Total Fat: {totalFat} grams</span>
+          <span>Total Carbs: {totalCarbs} grams</span>
+        </div>
         {foodRenders3}
       </div>
     )
   }
 }
 
-class Food3 extends React.Component {
+class Food extends React.Component {
   handleClick = () => {
     const {index, handleClick} = this.props;
     handleClick(index);
   }
   handleChange = (event) => {
-    this.props.handleChange(event.target.value, this.props.index);
+    const {index, handleChange} = this.props;
+    handleChange(event.target.value, index);
   }
   render() {
-    const {index, name, nutrients, grams, currentIndex} = this.props;
-    let current = currentIndex === index;
-    //console.log('Food3 nutrients', nutrients)
+    const {name, nutrients, grams, isExpanded} = this.props;
 
     const nutrientRenders = nutrients.map((nutrient, i) => {
       return (
@@ -240,7 +249,7 @@ class Food3 extends React.Component {
         <input type='number' value={grams} onChange={this.handleChange}></input>
         <ul>
           <li className='question' onClick={this.handleClick}>Details</li>
-          {current && <ul>{nutrientRenders}</ul>}
+          {isExpanded && <ul>{nutrientRenders}</ul>}
         </ul>
       </div>
     )
