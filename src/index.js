@@ -102,56 +102,25 @@ class Calculator extends React.Component {
   updateTotals = (grams, index) => {
     const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs} = this.state;
 
-    const newFoodGrams = [
-      ...foodGrams.slice(0, index),
-      Number(grams),
-      ...foodGrams.slice(index + 1)
-    ];
-
-    const newFoodCals = [
-      ...foodCals.slice(0, index),
-      grams * foodData[index].nutrients[0].value / 100,
-      ...foodCals.slice(index + 1)
-    ];
-
-    const newFoodProtein = [
-      ...foodProtein.slice(0, index),
-      grams * foodData[index].nutrients[1].value / 100,
-      ...foodProtein.slice(index + 1)
-    ];
-
-    const newFoodFat = [
-      ...foodFat.slice(0, index),
-      grams * foodData[index].nutrients[2].value / 100,
-      ...foodFat.slice(index + 1)
-    ];
-
-    const newFoodCarbs = [
-      ...foodCarbs.slice(0, index),
-      grams * foodData[index].nutrients[3].value / 100,
-      ...foodCarbs.slice(index + 1)
-    ];
+    const newCalsValue = grams * foodData[index].nutrients[0].value /100;
+    const newProteinValue = grams * foodData[index].nutrients[1].value /100;
+    const newFatValue = grams * foodData[index].nutrients[2].value /100;
+    const newCarbsValue = grams * foodData[index].nutrients[3].value /100;
 
     this.setState ({
-      foodGrams: newFoodGrams,
-      foodCals: newFoodCals,
-      foodProtein: newFoodProtein,
-      foodFat: newFoodFat,
-      foodCarbs: newFoodCarbs,
+      foodGrams: [...foodGrams.slice(0, index), Number(grams), ...foodGrams.slice(index + 1)],
+      foodCals: [...foodCals.slice(0, index), newCalsValue, ...foodCals.slice(index + 1)],
+      foodProtein: [...foodProtein.slice(0, index), newProteinValue, ...foodProtein.slice(index + 1)],
+      foodFat: [...foodFat.slice(0, index), newFatValue, ...foodFat.slice(index + 1)],
+      foodCarbs: [...foodCarbs.slice(0, index), newCarbsValue, ...foodCarbs.slice(index + 1)],
     })
   }
 
   toggleExpansion = (index) => {
-    const {expansions} = this.state
-    this.setState (prevState => {
-      return {expansions: prevState.expansions[index] ? [
-        ...expansions.slice(0, index),
-        false,
-        ...expansions.slice(index + 1)] : [
-          ...expansions.slice(0, index),
-          true,
-          ...expansions.slice(index + 1)
-        ]}
+    const {expansions} = this.state;
+    const newExpansions = [...expansions.slice(0, index), !expansions[index], ...expansions.slice(index + 1)];
+    this.setState ({
+      expansions: newExpansions
     })
   }
 
@@ -182,6 +151,24 @@ class Calculator extends React.Component {
     const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, expansions, isLoading, error} = this.state;
     
     const calcTotal = (nutrientArray) => roundToTwo(nutrientArray.reduce((t, g) => t + g, 0));
+
+
+
+
+    const nutrientArrays = foodData.map((food, index) => food.nutrients.map((nutrient, i) => nutrient.value * foodGrams[index] / 100));
+    
+    const totalCals = roundToTwo(nutrientArrays.reduce((t, a) => t + a[0], 0));
+    const totalProtein = roundToTwo(nutrientArrays.reduce((t, a) => t + a[1], 0));
+    const totalFat = roundToTwo(nutrientArrays.reduce((t, a) => t + a[2], 0));
+    const totalCarbs = roundToTwo(nutrientArrays.reduce((t, a) => t + a[3], 0));
+
+
+    console.log('totalCals', totalCals);
+    console.log('totalProtein', totalProtein);
+    console.log('totalFat', totalFat);
+    console.log('totalCarbs', totalCarbs);
+
+
 
     const foodRenders = foodData.map((food, i) => {
       return (
@@ -225,6 +212,7 @@ class Food extends React.Component {
     const {index, updateTotals} = this.props;
     updateTotals(event.target.value, index);
   }
+  
   render() {
     const {name, nutrients, grams, isExpanded} = this.props;
 
