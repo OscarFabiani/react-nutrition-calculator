@@ -90,29 +90,15 @@ class Calculator extends React.Component {
   state = {
     foodData: [],
     foodGrams: [0, 0, 0, 0, 0, 0],
-    foodCals: [0, 0, 0, 0, 0, 0],
-    foodProtein: [0, 0, 0, 0, 0, 0],
-    foodFat: [0, 0, 0, 0, 0, 0],
-    foodCarbs: [0, 0, 0, 0, 0, 0],
     expansions: [false, false, false, false, false, false],
     isLoading: false,
     error: null
   }
 
   updateTotals = (grams, index) => {
-    const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs} = this.state;
-
-    const newCalsValue = grams * foodData[index].nutrients[0].value /100;
-    const newProteinValue = grams * foodData[index].nutrients[1].value /100;
-    const newFatValue = grams * foodData[index].nutrients[2].value /100;
-    const newCarbsValue = grams * foodData[index].nutrients[3].value /100;
-
+    const {foodGrams} = this.state;
     this.setState ({
-      foodGrams: [...foodGrams.slice(0, index), Number(grams), ...foodGrams.slice(index + 1)],
-      foodCals: [...foodCals.slice(0, index), newCalsValue, ...foodCals.slice(index + 1)],
-      foodProtein: [...foodProtein.slice(0, index), newProteinValue, ...foodProtein.slice(index + 1)],
-      foodFat: [...foodFat.slice(0, index), newFatValue, ...foodFat.slice(index + 1)],
-      foodCarbs: [...foodCarbs.slice(0, index), newCarbsValue, ...foodCarbs.slice(index + 1)],
+      foodGrams: [...foodGrams.slice(0, index), Number(grams), ...foodGrams.slice(index + 1)]
     })
   }
 
@@ -148,28 +134,21 @@ class Calculator extends React.Component {
   }
   
   render() {
-    const {foodData, foodGrams, foodCals, foodProtein, foodFat, foodCarbs, expansions, isLoading, error} = this.state;
+    const {foodData, foodGrams, expansions, isLoading, error} = this.state;
     
-    const calcTotal = (nutrientArray) => roundToTwo(nutrientArray.reduce((t, g) => t + g, 0));
+    //Total grams of all foods
+    const totalGrams = foodGrams.reduce((total, grams) => total + grams, 0);
 
+    //Creates 6 arrays containing 4 values (1 for each nutrient) to be used for calculating totals
+    const nutrientArrays = foodData.map((food, index) => {
+      return food.nutrients.map(nutrient => {
+        return nutrient.value * foodGrams[index] / 100;
+      })
+    });
 
-
-
-    const nutrientArrays = foodData.map((food, index) => food.nutrients.map((nutrient, i) => nutrient.value * foodGrams[index] / 100));
+    //Creates an array with 4 values representing nutrient totals
+    const totals = [0, 1, 2, 3].map(index => nutrientArrays.reduce((total, array) => total + array[index], 0));
     
-    const totalCals = roundToTwo(nutrientArrays.reduce((t, a) => t + a[0], 0));
-    const totalProtein = roundToTwo(nutrientArrays.reduce((t, a) => t + a[1], 0));
-    const totalFat = roundToTwo(nutrientArrays.reduce((t, a) => t + a[2], 0));
-    const totalCarbs = roundToTwo(nutrientArrays.reduce((t, a) => t + a[3], 0));
-
-
-    console.log('totalCals', totalCals);
-    console.log('totalProtein', totalProtein);
-    console.log('totalFat', totalFat);
-    console.log('totalCarbs', totalCarbs);
-
-
-
     const foodRenders = foodData.map((food, i) => {
       return (
         <Food
@@ -189,11 +168,11 @@ class Calculator extends React.Component {
       isLoading ? <span>Loading...</span> :
       <div>
         <div className='meal'>
-          <span className='total'>Total Grams: {calcTotal(foodGrams)}</span>
-          <span className='total'>Total Calories: {calcTotal(foodCals)}</span>
-          <span className='total'>Total Protein: {calcTotal(foodProtein)} grams</span>
-          <span className='total'>Total Fat: {calcTotal(foodFat)} grams</span>
-          <span className='total'>Total Carbs: {calcTotal(foodCarbs)} grams</span>
+          <span className='total'>Total Grams: {totalGrams}</span>
+          <span className='total'>Total Calories: {roundToTwo(totals[0])}</span>
+          <span className='total'>Total Protein: {roundToTwo(totals[1])} grams</span>
+          <span className='total'>Total Fat: {roundToTwo(totals[2])} grams</span>
+          <span className='total'>Total Carbs: {roundToTwo(totals[3])} grams</span>
         </div>
         <div className='foods'>
           {foodRenders}
