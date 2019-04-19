@@ -48,21 +48,21 @@ const createFoodObject = (food) => {
       },
       {
         id: 203,
-        name: 'Protein',
+        name: 'Protein(g)',
         unit: 'grams',
         value: setNutrientValue(food.nutrients, 203),
         measurements: {},
       },
       {
         id: 204,
-        name: 'Fat',
+        name: 'Fat(g)',
         unit: 'grams',
         value: setNutrientValue(food.nutrients, 204),
         measurements: {},
       },
       {
         id: 205,
-        name: 'Carbs',
+        name: 'Carbs(g)',
         unit: 'grams',
         value: setNutrientValue(food.nutrients, 205),
         measurements: {},
@@ -72,16 +72,16 @@ const createFoodObject = (food) => {
 }
 
 
-//This function is used to round a number 2 decimal places and seems to avoid issues with using Math.round and
+//This function is used to round a number to 2 decimal places and seems to avoid issues with using Math.round and
 //the toFixed() method.
+//NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
 const roundToTwo = (num) => {    
   return +(Math.round(num + "e+2")  + "e-2");
 }
-//NOTE: an alternative to this would simply be: Math.round(nutrient.value * grams) / 100
 
 
-//URL for USDA food item:
-const itemURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
+//URL for USDA food items:
+const foodsURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
 
 const foodNames = ['Olive oil', 'Coconut oil', 'Eggs', 'Chickpeas', 'Black beans', 'Sardines'];
 
@@ -113,7 +113,7 @@ class Calculator extends React.Component {
   componentDidMount() {
     this.setState({isLoading: true})
 
-    fetch(itemURL)
+    fetch(foodsURL)
     .then(result => {
       if (result.ok) {
         return result.json();
@@ -136,8 +136,30 @@ class Calculator extends React.Component {
   render() {
     const {foodData, foodGrams, expansions, isLoading, error} = this.state;
     
-    //Total grams of all foods
-    const totalGrams = foodGrams.reduce((total, grams) => total + grams, 0);
+    return (
+      error ? <span>Something went wrong...{error.message}</span> :
+      isLoading ? <span>Loading...</span> :
+      <div className='calculator'>
+        <Meal
+        foodData={foodData}
+        foodGrams={foodGrams}
+        />
+        <Foods
+        foodData={foodData}
+        foodGrams={foodGrams}
+        expansions={expansions}
+        updateTotals={this.updateTotals}
+        toggleExpansion={this.toggleExpansion}
+        />
+      </div>
+    )
+  }
+}
+
+class Meal extends React.Component {
+  render () {
+    const {foodData, foodGrams} = this.props;
+    //const totalGrams = foodGrams.reduce((total, grams) => total + grams, 0);
 
     //Creates 6 arrays containing 4 values (1 for each nutrient) to be used for calculating totals
     const nutrientArrays = foodData.map((food, index) => {
@@ -148,7 +170,40 @@ class Calculator extends React.Component {
 
     //Creates an array with 4 values representing nutrient totals
     const totals = [0, 1, 2, 3].map(index => nutrientArrays.reduce((total, array) => total + array[index], 0));
-    
+
+    return (
+      <div className='meal'>
+        <h1 className="title">Macronutrient Calculator</h1>
+        <div>
+          <h2 className='totals-label'>Meal Totals:</h2>
+          <div className='totals'>
+            <div className='total'>
+              <h3 className='label total-column'>Calories</h3>
+              <h3 className='amount total-column'>: {roundToTwo(totals[0])}</h3>
+            </div>
+            <div className='total'>
+              <h3 className='label total-column'>Protein(g)</h3>
+              <h3 className='amount total-column'>: {roundToTwo(totals[1])}</h3>
+            </div>
+            <div className='total'>
+              <h3 className='label total-column'>Fat(g)</h3>
+              <h3 className='amount total-column'>: {roundToTwo(totals[2])}</h3>
+            </div>
+            <div className='total'>
+              <h3 className='label total-column'>Carbs(g)</h3>
+              <h3 className='amount total-column'>: {roundToTwo(totals[3])}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
+class Foods extends React.Component {
+  render() {
+    const {foodData, foodGrams, expansions, updateTotals, toggleExpansion} = this.props;
+
     const foodRenders = foodData.map((food, i) => {
       return (
         <Food
@@ -157,26 +212,14 @@ class Calculator extends React.Component {
           name={foodNames[i]}
           nutrients={food.nutrients}
           grams={foodGrams[i]}
-          updateTotals={this.updateTotals}
+          updateTotals={updateTotals}
           isExpanded={expansions[i]}
-          toggleExpansion={this.toggleExpansion}/>
+          toggleExpansion={toggleExpansion}/>
       )
     })
-    
     return (
-      error ? <span>Something went wrong...{error.message}</span> :
-      isLoading ? <span>Loading...</span> :
-      <div>
-        <div className='meal'>
-          <span className='total'>Total Grams: {totalGrams}</span>
-          <span className='total'>Total Calories: {roundToTwo(totals[0])}</span>
-          <span className='total'>Total Protein: {roundToTwo(totals[1])} grams</span>
-          <span className='total'>Total Fat: {roundToTwo(totals[2])} grams</span>
-          <span className='total'>Total Carbs: {roundToTwo(totals[3])} grams</span>
-        </div>
-        <div className='foods'>
-          {foodRenders}
-        </div>
+      <div className='foods'>
+        {foodRenders}
       </div>
     )
   }
@@ -197,19 +240,22 @@ class Food extends React.Component {
 
     const nutrientRenders = nutrients.map((nutrient, i) => {
       return (
-          <li key={i} className='answer'>{`${nutrient.name}: ${roundToTwo(nutrient.value * (grams / 100))} ${nutrient.unit}`}</li>
+        <div key={i} className='answer total'>
+          <div className='label food-column'>{nutrient.name}</div>
+          <div className='amount food-column'>: {roundToTwo(nutrient.value * (grams / 100))}</div>
+        </div>
       )
     })
 
     return (
       <div className='food'>
-        <h3>{name}</h3>
+        <h3 className='food-label'>{name}</h3>
         <div>
-          <input  className='input' type='number' value={grams} onChange={this.handleChange}></input>
-          <span>Grams</span>
+          <input  className='input' type='number' min='0' max='999' value={grams} onChange={this.handleChange}></input>
+          <span>(grams)</span>
         </div>
         <div>
-          <li className='question' onClick={this.handleClick}>Details</li>
+          <h4 className='question' onClick={this.handleClick}>Details</h4>
           {isExpanded && <ul>{nutrientRenders}</ul>}
         </div>
       </div>
@@ -227,7 +273,7 @@ ReactDOM.render(
 );
 
 
-//
+//STYLE
 
 //As of 4/15/19 I have created 2 methods to render data from an API food report. The first is to pull data from
 //the report considering the format of the food report object and necessarily filtering the nested nutrient

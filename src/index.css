@@ -1,10 +1,16 @@
 html {
   font-family: 'Courier New', Courier, monospace;
+  font-size: 15px;
   box-sizing: border-box;
   text-align: center;
-
 }
-body, ul {
+body {
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  background-color: antiquewhite;
+}
+body, h1, h2, h3, h4, ul {
   margin: 0;
   padding: 0;
   border: none;
@@ -13,37 +19,96 @@ ul, li {
   list-style: none;
 }
 
+.calculator {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 2em;
+  background-color: violet;
+}
 .meal {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2em;
   background-color: aqua;
 }
+.title {
+  margin-bottom: 1em;
+}
+.totals-label {
+}
+.totals {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: tan;
+}
 .total {
-  width: 300px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1em;
+  background-color: tomato;
+}
+.total-column {
+  width: 10em;
+}
+.food-column {
+  width: 6em;
+}
+.label {
+  display: flex;
+  justify-content: flex-end;
+  background-color: darkslateblue;
+}
+.amount {
+  display: flex;
+  justify-content: flex-start;
+  background-color: darkcyan;
 }
 .foods {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  background-color: cadetblue;
 }
 .food {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 1em;
+  border: 1px solid black;
+  box-sizing: border-box;
+  background-color: darkorange;
+}
+.food-label {
+  margin-bottom: 1em;
 }
 .input {
-  width: 50px;
+  width: 3em;
 }
 
 .question {
-  background: #00d7825c;
-  width: 200px;
-  box-shadow: -1px -1px 3px 0px #1a1a1a4f;
+  width: 12em;
+  border: 1px solid black;
+  box-sizing: border-box;
+  background-color: darkturquoise;
+  /*box-shadow: -1px -1px 3px 0px #1a1a1a4f;*/
   cursor: pointer;
 }
 .answer {
-  padding: .2rem;
+  width: 12em;
+  background-color: bisque;
 }
 
-.margin-bottom {
-  margin-bottom: 20px;
+/*Media queries*/
+@media (max-width: 630px) {
+  html {
+    font-size: 13px;
+  }
+  h1 {
+    font-size: 1.7em;
+  }
 }
