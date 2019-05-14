@@ -2,6 +2,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
+import 'font-awesome/css/font-awesome.min.css';
+import '../node_modules/font-awesome/css/font-awesome.min.css'; 
+
 
 
 
@@ -256,8 +259,12 @@ class Food extends React.Component {
           <span>(grams)</span>
         </div>
         <div className="details-display">
-          <h4 className='details-label' onClick={this.handleClick}>Details</h4>
-          {isExpanded && <ul>{nutrientRenders}</ul>}
+          <div className='details-label' onClick={this.handleClick}>
+            <i className="fa fa-sort-down down-icon"></i>
+            <h4>Details</h4>
+            <i className="fa fa-sort-down down-icon"></i>
+          </div>
+          {isExpanded && <ul className="nutrient-list">{nutrientRenders}</ul>}
         </div>
       </div>
     )
