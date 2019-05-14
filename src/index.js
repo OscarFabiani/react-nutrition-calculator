@@ -11,6 +11,9 @@ import '../node_modules/font-awesome/css/font-awesome.min.css';
 
 //API key: 5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j
 
+
+//Foods and id numbers:
+
 //Eggs 01123
 //Chickpeas 16058
 //Black beans 16018
@@ -199,6 +202,7 @@ class Meal extends React.Component {
             </div>
           </div>
         </div>
+        <p className="instructions">Enter amounts for foods and the meal totals automatically update!</p>
       </section>
     )
   }
@@ -242,6 +246,8 @@ class Food extends React.Component {
   render() {
     const {name, nutrients, grams, isExpanded} = this.props;
 
+    const iconClass = isExpanded ? "fa fa-sort-up icon up-icon" : "fa fa-sort-down icon down-icon";
+
     const nutrientRenders = nutrients.map((nutrient, i) => {
       return (
         <div key={i} className='food-nutrient-total'>
@@ -260,9 +266,9 @@ class Food extends React.Component {
         </div>
         <div className="details-display">
           <div className='details-label' onClick={this.handleClick}>
-            <i className="fa fa-sort-down down-icon"></i>
+            <i className={iconClass}></i>
             <h4>Details</h4>
-            <i className="fa fa-sort-down down-icon"></i>
+            <i className={iconClass}></i>
           </div>
           {isExpanded && <ul className="nutrient-list">{nutrientRenders}</ul>}
         </div>
@@ -279,6 +285,7 @@ ReactDOM.render(
   <Calculator />,
   document.getElementById('root')
 );
+
 
 
 //STYLE
@@ -504,74 +511,6 @@ class Food extends React.Component {
         <span>(per 100 grams)</span>
         {nutrientRenders}
       </div>
-    )
-  }
-}
-*/
-
-
-
-
-
-//URL to JSON data for my github repos
-//const url = 'https://api.github.com/users/oscarfabiani/repos';
-
-
-
-//Formerly in componentDidUpdate of Accordian
-/*
-fetch(url)
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          return;
-        }
-      })
-      .then(response => {
-        //console.log('response', response)
-        this.setState({
-          data: response,
-          isLoading: false
-        })
-      })
-      .catch(error => {
-        console.log('error: ', error);
-        this.setState({error})
-      })
-
-*/
-
-//Formerly in the render of Accordian
-/*
-const repoRenders = data.map((repo, i) => {
-  //console.log('repo', repo)
-  return (
-    <Repo
-      key={repo.id}
-      index={i}
-      name={repo.name}
-      desc={repo.description}
-      currentIndex={currentIndex}
-      handleClick={this.handleClick}/>
-  )
-})
-*/
-
-/*
-class Repo extends React.Component {
-  handleClick = () => {
-    const {index, handleClick} = this.props;
-    handleClick(index);
-  }
-  render() {
-    const {index, name, desc, currentIndex} = this.props;
-    let current = currentIndex === index;
-    return (
-      <ul className='holder'>
-        <li className='question'onClick={this.handleClick}>{name}</li>
-        {current && <li className={current ? 'answer open' : 'answer'}>{desc}</li>}
-      </ul>
     )
   }
 }
