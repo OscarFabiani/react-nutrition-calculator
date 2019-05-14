@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import './index.scss';
 
 
 
@@ -83,6 +83,7 @@ const roundToTwo = (num) => {
 //URL for USDA food items:
 const foodsURL = 'https://api.nal.usda.gov/ndb/V2/reports?ndbno=04053&ndbno=04047&ndbno=01123&ndbno=16018&ndbno=16058&ndbno=15088&&type=f&format=json&api_key=5iIK49BdqtpcdNs7c4x9B7g6guq7saZaWOVdnn8j';
 
+//Object to replace lengthy food names from USDA database with preferred/concise food names
 const foodNames = ['Olive oil', 'Coconut oil', 'Eggs', 'Chickpeas', 'Black beans', 'Sardines'];
 
 
@@ -172,30 +173,30 @@ class Meal extends React.Component {
     const totals = [0, 1, 2, 3].map(index => nutrientArrays.reduce((total, array) => total + array[index], 0));
 
     return (
-      <div className='meal'>
+      <section className='meal-display'>
         <h1 className="title">Macronutrient Calculator</h1>
-        <div>
+        <div className="meal-totals">
           <h2 className='totals-label'>Meal Totals:</h2>
-          <div className='totals'>
-            <div className='total'>
-              <h3 className='label total-column'>Calories</h3>
-              <h3 className='amount total-column'>: {roundToTwo(totals[0])}</h3>
+          <div className='totals-table'>
+            <div className='meal-nutrient-total'>
+              <h3 className='total-column label'>Calories</h3>
+              <h3 className='total-column amount'>: {roundToTwo(totals[0])}</h3>
             </div>
-            <div className='total'>
-              <h3 className='label total-column'>Protein(g)</h3>
-              <h3 className='amount total-column'>: {roundToTwo(totals[1])}</h3>
+            <div className='meal-nutrient-total'>
+              <h3 className='total-column label'>Protein(g)</h3>
+              <h3 className='total-column amount'>: {roundToTwo(totals[1])}</h3>
             </div>
-            <div className='total'>
-              <h3 className='label total-column'>Fat(g)</h3>
-              <h3 className='amount total-column'>: {roundToTwo(totals[2])}</h3>
+            <div className='meal-nutrient-total'>
+              <h3 className='total-column label'>Fat(g)</h3>
+              <h3 className='total-column amount'>: {roundToTwo(totals[2])}</h3>
             </div>
-            <div className='total'>
-              <h3 className='label total-column'>Carbs(g)</h3>
-              <h3 className='amount total-column'>: {roundToTwo(totals[3])}</h3>
+            <div className='meal-nutrient-total'>
+              <h3 className='total-column label'>Carbs(g)</h3>
+              <h3 className='total-column amount'>: {roundToTwo(totals[3])}</h3>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     )
   }
 }
@@ -240,9 +241,9 @@ class Food extends React.Component {
 
     const nutrientRenders = nutrients.map((nutrient, i) => {
       return (
-        <div key={i} className='answer total'>
-          <div className='label food-column'>{nutrient.name}</div>
-          <div className='amount food-column'>: {roundToTwo(nutrient.value * (grams / 100))}</div>
+        <div key={i} className='food-nutrient-total'>
+          <p className='food-column label'>{nutrient.name}</p>
+          <p className='food-column amount'>: {roundToTwo(nutrient.value * (grams / 100))}</p>
         </div>
       )
     })
@@ -250,12 +251,12 @@ class Food extends React.Component {
     return (
       <div className='food'>
         <h3 className='food-label'>{name}</h3>
-        <div>
-          <input  className='input' type='number' min='0' max='999' value={grams} onChange={this.handleChange}></input>
+        <div className="input-display">
+          <input className='input' type='number' min='0' max='999' value={grams} onChange={this.handleChange}/>
           <span>(grams)</span>
         </div>
-        <div>
-          <h4 className='question' onClick={this.handleClick}>Details</h4>
+        <div className="details-display">
+          <h4 className='details-label' onClick={this.handleClick}>Details</h4>
           {isExpanded && <ul>{nutrientRenders}</ul>}
         </div>
       </div>
@@ -283,7 +284,7 @@ ReactDOM.render(
 //nutrients (though it looks I'll still need either a local object or added logic to the custom object to
 //display prefferred food names).
 
-//As of now I'm not sure which of these methods will be best going forward. It looks like the second methods
+//As of now I'm not sure which of these methods will be best going forward. It looks like the second method
 //results in more lines of code but makes the components more concise and understandable. One method may prove
 //preferrable over the other as I add secondary nutrients and increase functionality.
 
@@ -507,6 +508,8 @@ class Food extends React.Component {
 
 //URL to JSON data for my github repos
 //const url = 'https://api.github.com/users/oscarfabiani/repos';
+
+
 
 //Formerly in componentDidUpdate of Accordian
 /*

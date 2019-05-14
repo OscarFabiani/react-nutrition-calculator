@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+html {
+  font-family: 'Roboto', sans-serif;
+  font-size: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}
+body {
+  /*display: flex;
+  justify-content: center;
+  height: 100vh;*/
+  background-color: antiquewhite;
+}
+body, h1, h2, h3, h4, p, ul {
+  margin: 0;
+  padding: 0;
+}
+
+%flex-column-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center
+}
+
+.calculator {
+  @extend %flex-column-centered;
+  background-color: violet;
+  .meal-display {
+    @extend %flex-column-centered;
+    margin: 2em 0 1em;
+    background-color: aqua;
+    h1.title {
+      margin-bottom: 1em;
+    }
+    .meal-totals {
+      h2.totals-label {
+        margin-bottom: 1em;
+      }
+      .totals-table {
+        @extend %flex-column-centered;
+        width: 16em;
+        background-color: tan;
+        .meal-nutrient-total {
+          display: flex;
+          margin-bottom: 1em;
+          width: 100%;
+          background-color: tomato;
+          h3.total-column {
+            display: flex;
+            width: 50%;
+            &.label {
+              justify-content: flex-end;
+              background-color: darkslateblue;
+            }
+            &.amount {
+              justify-content: flex-start;
+              background-color: darkcyan;
+            }
+          }
+        }
+      }
+    }
+  }
+  .foods {
+    @extend %flex-column-centered;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 60em; //minimum to allow 3 rows max
+    background-color: cadetblue;
+    .food {
+      @extend %flex-column-centered;
+      margin: 0 2em 1em;
+      width: 16em;
+      border: .5em solid black;
+      border-radius: 10px;
+      box-sizing: border-box;
+      background-color: darkorange;
+      h3.food-label {
+        margin-bottom: 1em;
+      }
+      .input-display {
+        .input {
+          width: 3em;
+        }
+      }
+      .details-display {
+        width: 100%;
+        .details-label {
+          width: 100%;
+          background-color: darkturquoise;
+          /*box-shadow: -1px -1px 3px 0px #1a1a1a4f;*/
+          cursor: pointer;
+        }
+        .food-nutrient-total {
+          display: flex;
+          margin-top: 1em;
+          background-color: bisque;
+          p.food-column {
+            display: flex;
+            width: 50%;
+            &.label {
+              justify-content: flex-end;
+              background-color: darkslateblue;
+            }
+            &.amount {
+              justify-content: flex-start;
+              background-color: darkcyan;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/*Media queries*/
+@media (max-width: 630px) {
+  body {
+    font-size: .8em;
+  }
+  h1 {
+    font-size: 1.7em;
+  }
+}
+
+/*CONTINUE STYLING*/
+/*ADD DIRECTIONS UNDER MAIN TITLE*/
+/*MAKE MEAL DISPLAY WIDER FOR WIDE SCREEN SIZES*/
+/*CHANGE DEFAULT TEXT FOR INPUTS*/
+/*POSSIBLY ADD MORE FOODS*/
