@@ -48,14 +48,15 @@ input[type=number]::-webkit-outer-spin-button {
 
 .calculator {
   @extend %flex-column-centered;
-  //background-color: violet;
+  width: 100%;
   .meal-display {
     @extend %flex-column-centered;
     margin: 2em 0;
-    //background-color: aqua;
+    width: 100%;
     h1.title {
       font-size: 2.5em;
       margin-bottom: 1em;
+      width: 90%;
       color: $color1;
     }
     .meal-totals {
@@ -69,23 +70,19 @@ input[type=number]::-webkit-outer-spin-button {
       .totals-table {
         @extend %flex-column-centered;
         width: 22em;
-        //background-color: tan;
         .meal-nutrient-total {
           display: flex;
           border: .05em solid $color1;
           width: 100%;
-          //background-color: tomato;
           h3.total-column {
             display: flex;
             padding: .5em 0;
             width: 50%;
             &.label {
               justify-content: flex-end;
-              //background-color: darkslateblue;
             }
             &.amount {
               justify-content: flex-start;
-              //background-color: darkcyan;
             }
           }
         }
@@ -93,7 +90,7 @@ input[type=number]::-webkit-outer-spin-button {
     }
     p.instructions {
       margin-top: 2em;
-      padding: 0 .5em;
+      width: 90%;
       color: $color5;
     }
     @media (min-width: 320px) and (max-width: 480px) {
@@ -108,8 +105,8 @@ input[type=number]::-webkit-outer-spin-button {
     @extend %flex-column-centered;
     flex-direction: row;
     flex-wrap: wrap;
+    width: 100%;
     max-width: 60em; //minimum to allow 3 rows max
-    //background-color: cadetblue;
     .food {
       @extend %flex-column-centered;
       margin: 0 2em 1em;
@@ -141,7 +138,6 @@ input[type=number]::-webkit-outer-spin-button {
           width: 100%;
           color: white;
           background-color: $color5;
-          /*box-shadow: -1px -1px 3px 0px #1a1a1a4f;*/
           cursor: pointer;
           i.icon {
             font-size: 1.5em;
@@ -158,17 +154,14 @@ input[type=number]::-webkit-outer-spin-button {
             display: flex;
             padding: .2em 0;
             border-bottom: .05em solid $color5;
-            //background-color: bisque;
             p.food-column {
               display: flex;
               width: 50%;
               &.label {
                 justify-content: flex-end;
-                //background-color: darkslateblue;
               }
               &.amount {
                 justify-content: flex-start;
-                //background-color: darkcyan;
               }
             }
           }
@@ -186,5 +179,4 @@ input[type=number]::-webkit-outer-spin-button {
   }
 }
 
-/*ADD BACKGROUND IMAGE*/
 /*POSSIBLY ADD MORE FOODS*/
