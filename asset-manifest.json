@@ -1,16 +1,16 @@
 {
-  "main.css": "/react-nutrition-calculator/static/css/main.2f43c43f.chunk.css",
-  "main.js": "/react-nutrition-calculator/static/js/main.bbc98bf2.chunk.js",
-  "main.js.map": "/react-nutrition-calculator/static/js/main.bbc98bf2.chunk.js.map",
+  "main.css": "/react-nutrition-calculator/static/css/main.2d134b2e.chunk.css",
+  "main.js": "/react-nutrition-calculator/static/js/main.98faecc1.chunk.js",
+  "main.js.map": "/react-nutrition-calculator/static/js/main.98faecc1.chunk.js.map",
   "runtime~main.js": "/react-nutrition-calculator/static/js/runtime~main.d5b9e548.js",
   "runtime~main.js.map": "/react-nutrition-calculator/static/js/runtime~main.d5b9e548.js.map",
   "static/css/2.f4e987ed.chunk.css": "/react-nutrition-calculator/static/css/2.f4e987ed.chunk.css",
-  "static/js/2.107d755d.chunk.js": "/react-nutrition-calculator/static/js/2.107d755d.chunk.js",
-  "static/js/2.107d755d.chunk.js.map": "/react-nutrition-calculator/static/js/2.107d755d.chunk.js.map",
+  "static/js/2.b303ecc1.chunk.js": "/react-nutrition-calculator/static/js/2.b303ecc1.chunk.js",
+  "static/js/2.b303ecc1.chunk.js.map": "/react-nutrition-calculator/static/js/2.b303ecc1.chunk.js.map",
   "index.html": "/react-nutrition-calculator/index.html",
-  "precache-manifest.04fc20d66fb5d8877d8d0eedb46160da.js": "/react-nutrition-calculator/precache-manifest.04fc20d66fb5d8877d8d0eedb46160da.js",
+  "precache-manifest.9c46d9adb64009819812b39df12f31cb.js": "/react-nutrition-calculator/precache-manifest.9c46d9adb64009819812b39df12f31cb.js",
   "service-worker.js": "/react-nutrition-calculator/service-worker.js",
   "static/css/2.f4e987ed.chunk.css.map": "/react-nutrition-calculator/static/css/2.f4e987ed.chunk.css.map",
-  "static/css/main.2f43c43f.chunk.css.map": "/react-nutrition-calculator/static/css/main.2f43c43f.chunk.css.map",
+  "static/css/main.2d134b2e.chunk.css.map": "/react-nutrition-calculator/static/css/main.2d134b2e.chunk.css.map",
   "static/media/font-awesome.min.css": "/react-nutrition-calculator/static/media/fontawesome-webfont.fee66e71.woff"
 }
