@@ -4,10 +4,12 @@
   "private": true,
   "homepage": "https://oscarfabiani.github.io/react-nutrition-calculator/",
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "font-awesome": "^4.7.0",
     "gh-pages": "^2.0.1",
     "node-sass": "^4.12.0",
     "react": "^16.8.5",
+    "react-app-polyfill": "^1.0.1",
     "react-dom": "^16.8.5",
     "react-scripts": "2.1.8"
   },

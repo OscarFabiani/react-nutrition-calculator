@@ -1,9 +1,9 @@
-
+import "react-app-polyfill/ie9";
+import "babel-polyfill";
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 import 'font-awesome/css/font-awesome.min.css';
-import '../node_modules/font-awesome/css/font-awesome.min.css'; 
 
 
 
